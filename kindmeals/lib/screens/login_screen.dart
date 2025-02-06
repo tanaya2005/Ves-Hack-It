@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../widgets/custom_textfield.dart';
 import '../widgets/custom_button.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
-
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -14,59 +13,56 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  void _login() {
+  void _login(BuildContext context) {
     if (_formKey.currentState!.validate()) {
-      Navigator.pushNamed(context, '/donorDashboard'); // Change based on user role
+      final role = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {'role': 'Donor'};
+
+      if (role['role'] == 'Donor') {
+        Navigator.pushReplacementNamed(context, '/donorDashboard');
+      } else if (role['role'] == 'Recipient') {
+        Navigator.pushReplacementNamed(context, '/recipientDashboard');
+      } else if (role['role'] == 'Volunteer') {
+        Navigator.pushReplacementNamed(context, '/volunteerDashboard');
+      }
+    }
+  }
+
+  void _signInWithGoogle() async {
+    final GoogleSignIn _googleSignIn = GoogleSignIn();
+    try {
+      final account = await _googleSignIn.signIn();
+      if (account != null) {
+        Navigator.pushReplacementNamed(context, '/donorDashboard'); // Redirect after Google sign-in
+      }
+    } catch (error) {
+      print('Google Sign-In Error: $error');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5F5F5),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset("assets/images/login.png", height: 120),
-                SizedBox(height: 20),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(color: Colors.grey.shade300, blurRadius: 10, spreadRadius: 2),
-                    ],
-                  ),
-                  padding: EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      Text("Welcome Back!", style: Theme.of(context).textTheme.displayLarge),
-                      SizedBox(height: 10),
-                      CustomTextField(label: 'Email', controller: emailController, keyboardType: TextInputType.emailAddress),
-                      CustomTextField(label: 'Password', controller: passwordController, obscureText: true),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () => Navigator.pushNamed(context, '/forgotPassword'),
-                          child: Text('Forgot Password?', style: TextStyle(color: Colors.green)),
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      CustomButton(text: 'Login', onPressed: _login),
-                      SizedBox(height: 10),
-                      TextButton(
-                        onPressed: () => Navigator.pushNamed(context, '/signup'),
-                        child: Text("Don't have an account? Sign Up"),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+      appBar: AppBar(title: Text('Login')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              CustomTextField(label: 'Email', controller: emailController),
+              CustomTextField(label: 'Password', controller: passwordController, obscureText: true),
+              SizedBox(height: 20),
+              CustomButton(text: 'Login', onPressed: () => _login(context)),
+              SizedBox(height: 10),
+              Text('OR', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              SizedBox(height: 10),
+              ElevatedButton.icon(
+                onPressed: _signInWithGoogle,
+                icon: Icon(Icons.account_circle),
+                label: Text('Sign in with Google'),
+                style: ElevatedButton.styleFrom(foregroundColor: Colors.black, backgroundColor: Colors.white),
+              ),
+            ],
           ),
         ),
       ),
