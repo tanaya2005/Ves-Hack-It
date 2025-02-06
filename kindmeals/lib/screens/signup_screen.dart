@@ -12,14 +12,19 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  String _selectedRole = 'Donor';
+  String _selectedRole = 'Donor'; // Default role
 
   void _signup() {
     if (_formKey.currentState!.validate()) {
-      Navigator.pushReplacementNamed(
+      // ✅ Navigate to OTP screen with selected role
+      Navigator.pushNamed(
         context,
         '/otpVerification',
-        arguments: {'role': _selectedRole}, // Pass role to OTP screen
+        arguments: {'role': _selectedRole}, // Passing role to OTP screen
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill all fields')),
       );
     }
   }
@@ -41,15 +46,27 @@ class _SignupScreenState extends State<SignupScreen> {
               Text('Register as:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ListTile(
                 title: Text('Donor'),
-                leading: Radio(value: 'Donor', groupValue: _selectedRole, onChanged: (value) => setState(() => _selectedRole = value.toString())),
+                leading: Radio(
+                  value: 'Donor',
+                  groupValue: _selectedRole,
+                  onChanged: (value) => setState(() => _selectedRole = value.toString()),
+                ),
               ),
               ListTile(
                 title: Text('Recipient'),
-                leading: Radio(value: 'Recipient', groupValue: _selectedRole, onChanged: (value) => setState(() => _selectedRole = value.toString())),
+                leading: Radio(
+                  value: 'Recipient',
+                  groupValue: _selectedRole,
+                  onChanged: (value) => setState(() => _selectedRole = value.toString()),
+                ),
               ),
               ListTile(
                 title: Text('Volunteer'),
-                leading: Radio(value: 'Volunteer', groupValue: _selectedRole, onChanged: (value) => setState(() => _selectedRole = value.toString())),
+                leading: Radio(
+                  value: 'Volunteer',
+                  groupValue: _selectedRole,
+                  onChanged: (value) => setState(() => _selectedRole = value.toString()),
+                ),
               ),
               SizedBox(height: 20),
               CustomButton(text: 'Register', onPressed: _signup),

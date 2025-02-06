@@ -11,6 +11,7 @@ import 'screens/donor_dashboard.dart';
 import 'screens/recipient_dashboard.dart';
 import 'screens/volunteer_dashboard.dart';
 import 'screens/chat_screen.dart';
+import 'screens/otp_verification.dart';
 
 void main() {
   runApp(const KindMealsApp());
@@ -30,10 +31,11 @@ class KindMealsApp extends StatelessWidget {
         '/': (context) => LanguageSelectionPage(),
         '/welcome': (context) => WelcomeSplashScreen(),
         '/registerLogin': (context) => RegisterLoginPage(),
-        '/signup': (context) => SignupScreen(),
         '/login': (context) => LoginScreen(),
         '/forgotPassword': (context) => ForgotPasswordScreen(),
         '/roleSelection': (context) => RoleSelectionPage(),
+        '/signup': (context) => SignupScreen(),
+        '/otpVerification': (context) => OTPVerificationScreen(),
         '/donorDashboard': (context) => DonorDashboard(),
         '/recipientDashboard': (context) => RecipientDashboard(),
         '/volunteerDashboard': (context) => VolunteerDashboard(),
