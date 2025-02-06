@@ -34,7 +34,7 @@ class KindMealsApp extends StatelessWidget {
         '/login': (context) => LoginScreen(),
         '/forgotPassword': (context) => ForgotPasswordScreen(),
         '/roleSelection': (context) => RoleSelectionPage(),
-        '/signup': (context) => SignupScreen(),
+        '/signup': (context) => RegisterScreen(),
         '/otpVerification': (context) => OTPVerificationScreen(),
         '/donorDashboard': (context) => DonorDashboard(),
         '/recipientDashboard': (context) => RecipientDashboard(),
