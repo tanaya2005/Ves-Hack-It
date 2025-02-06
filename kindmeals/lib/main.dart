@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kindmeals/screens/chat_screen.dart';
+import 'theme.dart';
 import 'screens/language_selection.dart';
 import 'screens/welcome_splash.dart';
 import 'screens/register_login.dart';
@@ -10,20 +10,21 @@ import 'screens/role_selection.dart';
 import 'screens/donor_dashboard.dart';
 import 'screens/recipient_dashboard.dart';
 import 'screens/volunteer_dashboard.dart';
+import 'screens/chat_screen.dart';
 
 void main() {
   runApp(const KindMealsApp());
 }
 
 class KindMealsApp extends StatelessWidget {
-  const KindMealsApp({super.key});
+  const KindMealsApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'KindMeals',
-      theme: ThemeData(primarySwatch: Colors.green),
-      debugShowCheckedModeBanner: false, // Removes the debug icon
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
       initialRoute: '/',
       routes: {
         '/': (context) => LanguageSelectionPage(),

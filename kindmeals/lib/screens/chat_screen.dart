@@ -1,21 +1,51 @@
 import 'package:flutter/material.dart';
 
-class ChatScreen extends StatelessWidget {
-  final String recipientName; // ✅ Accept recipient name
+class ChatScreen extends StatefulWidget {
+  final String recipientName;
+  ChatScreen({required this.recipientName});
 
-  const ChatScreen({super.key, required this.recipientName}); // ✅ Constructor to receive donor name
+  @override
+  _ChatScreenState createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+  List<String> messages = [];
+  TextEditingController messageController = TextEditingController();
+
+  void sendMessage() {
+    setState(() {
+      messages.add(messageController.text);
+    });
+    messageController.clear();
+  }
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController messageController = TextEditingController();
-
     return Scaffold(
-      appBar: AppBar(title: Text('Chat with $recipientName')), // ✅ Show correct name
+      appBar: AppBar(title: Text('Chat with ${widget.recipientName}')),
       body: Column(
         children: [
-          Expanded(child: ListView()), // Placeholder for chat messages
+          Expanded(
+            child: ListView.builder(
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                return Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    padding: EdgeInsets.all(12),
+                    margin: EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade300,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(messages[index], style: TextStyle(color: Colors.white)),
+                  ),
+                );
+              },
+            ),
+          ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(10.0),
             child: Row(
               children: [
                 Expanded(
@@ -25,10 +55,8 @@ class ChatScreen extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.send),
-                  onPressed: () {
-                    // TODO: Implement chat backend
-                  },
+                  icon: Icon(Icons.send, color: Colors.green),
+                  onPressed: sendMessage,
                 ),
               ],
             ),

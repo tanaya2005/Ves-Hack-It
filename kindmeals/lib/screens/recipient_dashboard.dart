@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import 'chat_screen.dart'; // ✅ Import Chat Screen
+import 'chat_screen.dart';
 
 class RecipientDashboard extends StatelessWidget {
-  const RecipientDashboard({super.key});
+  final List<Map<String, dynamic>> liveDonations = [
+    {'title': '20kg Rice', 'donor': 'John Doe', 'location': 'Mumbai'},
+    {'title': '10kg Vegetables', 'donor': 'Food Store', 'location': 'Pune'},
+  ];
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>> liveDonations = [
-      {'title': '20kg Rice', 'donor': 'John Doe', 'location': 'Mumbai'},
-      {'title': '10kg Vegetables', 'donor': 'Food Store', 'location': 'Pune'},
-    ];
-
     return Scaffold(
       appBar: AppBar(title: Text('Recipient Dashboard')),
       body: ListView.builder(
@@ -25,18 +23,15 @@ class RecipientDashboard extends StatelessWidget {
                   context: context,
                   builder: (context) => AlertDialog(
                     title: Text(liveDonations[index]['title']),
-                    content: Text(
-                        'Donor: ${liveDonations[index]['donor']}\nLocation: ${liveDonations[index]['location']}'),
+                    content: Text('Donor: ${liveDonations[index]['donor']}\nLocation: ${liveDonations[index]['location']}'),
                     actions: [
                       TextButton(
                         onPressed: () {
-                          Navigator.pop(context); // Close Dialog
+                          Navigator.pop(context);
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ChatScreen(
-                                recipientName: liveDonations[index]['donor'], // ✅ Pass Donor Name
-                              ),
+                              builder: (context) => ChatScreen(recipientName: liveDonations[index]['donor']),
                             ),
                           );
                         },
