@@ -1,6 +1,7 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart'; // Add this package for Facebook login
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -38,11 +39,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _verifyOtp() {
     if (otpController.text == generatedOtp) {
-      Navigator.pushReplacementNamed(context, '/dashboard');
+      Navigator.pushReplacementNamed(context, '/donorDashboard');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Invalid OTP. Please try again.")),
       );
+    }
+  }
+
+  // Google Sign-In
+  void _signInWithGoogle(BuildContext context) async {
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    try {
+      final account = await googleSignIn.signIn();
+      if (account != null) {
+        Navigator.pushReplacementNamed(context, '/donorDashboard'); // Redirect to dashboard
+      }
+    } catch (error) {
+      print('Google Sign-In Error: $error');
+    }
+  }
+
+  // Facebook Sign-In
+  void _signInWithFacebook(BuildContext context) async {
+    try {
+      final LoginResult result = await FacebookAuth.instance.login();
+      if (result.status == LoginStatus.success) {
+        Navigator.pushReplacementNamed(context, '/donorDashboard'); // Redirect to dashboard
+      } else {
+        print('Facebook Sign-In Error: ${result.status}');
+      }
+    } catch (error) {
+      print('Facebook Sign-In Error: $error');
     }
   }
 
@@ -115,6 +143,53 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ],
 
                 SizedBox(height: 20),
+
+                // Divider
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: Colors.white24, thickness: 1)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text('OR', style: TextStyle(color: Colors.white54)),
+                    ),
+                    Expanded(child: Divider(color: Colors.white24, thickness: 1)),
+                  ],
+                ),
+                SizedBox(height: 20),
+
+                // Google Sign-In Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _signInWithGoogle(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    icon: Image.asset('assets/google_logo.png', height: 24), // Add Google logo in assets
+                    label: Text('Continue with Google', style: TextStyle(color: Colors.black, fontSize: 16)),
+                  ),
+                ),
+                SizedBox(height: 10),
+
+                // Facebook Sign-In Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _signInWithFacebook(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue[800],
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    icon: Image.asset('assets/facebook_logo.png', height: 24), // Add Facebook logo in assets
+                    label: Text('Continue with Facebook', style: TextStyle(color: Colors.white, fontSize: 16)),
+                  ),
+                ),
+                SizedBox(height: 10),
+
+                // Login Option
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

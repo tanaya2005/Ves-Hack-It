@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -5,12 +7,14 @@ class LoginScreen extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  LoginScreen({super.key});
+
   void _signInWithGoogle(BuildContext context) async {
-    final GoogleSignIn _googleSignIn = GoogleSignIn();
+    final GoogleSignIn googleSignIn = GoogleSignIn();
     try {
-      final account = await _googleSignIn.signIn();
+      final account = await googleSignIn.signIn();
       if (account != null) {
-        Navigator.pushReplacementNamed(context, '/dashboard'); // Redirect to dashboard
+        Navigator.pushReplacementNamed(context, '/donorDashboard'); // Redirect to dashboard
       }
     } catch (error) {
       print('Google Sign-In Error: $error');
@@ -93,7 +97,7 @@ class LoginScreen extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/dashboard'); // Replace with actual login logic
+                      Navigator.pushReplacementNamed(context, '/donorDashboard'); // Replace with actual login logic
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,

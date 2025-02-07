@@ -37,6 +37,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   google_sign_in: ^6.2.2
+  flutter_facebook_auth: ^7.1.1
 
 dev_dependencies:
   flutter_test:

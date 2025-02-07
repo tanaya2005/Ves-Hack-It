@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "890474310680",
+    "project_id": "kindmeals-fba5e",
+    "storage_bucket": "kindmeals-fba5e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:890474310680:android:be2236633d61261f76276d",
+        "android_client_info": {
+          "package_name": "com.example.kindmeals"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "890474310680-9h9ek0vv3601q4gi9065m8aph4chp7b8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.kindmeals",
+            "certificate_hash": "811a645951069ebdc42f49cc20f2ef307b295aa5"
+          }
+        },
+        {
+          "client_id": "890474310680-8cig7d11g6cfk0vkoi8hl17tu1u0rf3b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBObmkl9FM6dH3y9YKO2xIIme98NXptHLY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "890474310680-8cig7d11g6cfk0vkoi8hl17tu1u0rf3b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
