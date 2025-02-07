@@ -39,7 +39,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _verifyOtp() {
     if (otpController.text == generatedOtp) {
-      Navigator.pushReplacementNamed(context, '/donorDashboard');
+      Navigator.pushReplacementNamed(context, '/dashboard');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Invalid OTP. Please try again.")),
@@ -53,7 +53,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       final account = await googleSignIn.signIn();
       if (account != null) {
-        Navigator.pushReplacementNamed(context, '/donorDashboard'); // Redirect to dashboard
+        Navigator.pushReplacementNamed(context, '/dashboard'); // Redirect to dashboard
       }
     } catch (error) {
       print('Google Sign-In Error: $error');
@@ -65,7 +65,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       final LoginResult result = await FacebookAuth.instance.login();
       if (result.status == LoginStatus.success) {
-        Navigator.pushReplacementNamed(context, '/donorDashboard'); // Redirect to dashboard
+        Navigator.pushReplacementNamed(context, '/dashboard'); // Redirect to dashboard
       } else {
         print('Facebook Sign-In Error: ${result.status}');
       }

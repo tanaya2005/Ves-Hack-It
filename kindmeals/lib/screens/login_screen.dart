@@ -14,7 +14,7 @@ class LoginScreen extends StatelessWidget {
     try {
       final account = await googleSignIn.signIn();
       if (account != null) {
-        Navigator.pushReplacementNamed(context, '/donorDashboard'); // Redirect to dashboard
+        Navigator.pushReplacementNamed(context, '/dashboard'); // Redirect to dashboard
       }
     } catch (error) {
       print('Google Sign-In Error: $error');
@@ -97,7 +97,7 @@ class LoginScreen extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/donorDashboard'); // Replace with actual login logic
+                      Navigator.pushReplacementNamed(context, '/dashboard'); // Replace with actual login logic
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
