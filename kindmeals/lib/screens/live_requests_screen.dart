@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:kindmeals/screens/item_detail_screen.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class LiveDonationRequestsScreen extends StatefulWidget {
   const LiveDonationRequestsScreen({super.key});
@@ -14,28 +13,48 @@ class LiveDonationRequestsScreen extends StatefulWidget {
 class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen> {
   final List<Map<String, String>> _donationRequests = [
     {
-      'foodName': 'Vegetables',
+      'foodName': 'Rice',
       'quantity': '5 kg',
       'expirationDate': '10/02/2025 18:00',
-      'description': 'Fresh vegetables for donation',
-      'image': 'https://i.ytimg.com/vi/fx3mg1ow3HA/maxresdefault.jpg',
-      'location': 'New York, USA',
-      'donorName': 'John Doe',
+      'image': 'https://www.mississippivegan.com/wp-content/uploads/2021/12/easy-baked-rice-02-1170x1463.jpg',
+      'location': 'New Delhi, India',
+      'donorName': 'Rahul Kumar',
       'donorVerification': 'Verified',
-      'latitude': '40.7128',
-      'longitude': '-74.0060',
+      'latitude': '28.7041',
+      'longitude': '77.1025',
     },
     {
-      'foodName': 'Fruits',
+      'foodName': 'Lentils (Dal)',
       'quantity': '3 kg',
       'expirationDate': '10/02/2025 19:00',
-      'description': 'Fresh fruits for donation',
-      'image': 'https://example.com/fruits.jpg',
-      'location': 'Los Angeles, USA',
-      'donorName': 'Jane Smith',
+      'image': 'https://example.com/lentils.jpg',
+      'location': 'Mumbai, India',
+      'donorName': 'Priya Sharma',
       'donorVerification': 'Unverified',
-      'latitude': '34.0522',
-      'longitude': '-118.2437',
+      'latitude': '19.0760',
+      'longitude': '72.8777',
+    },
+    {
+      'foodName': 'Chapati (Flatbread)',
+      'quantity': '20 pieces',
+      'expirationDate': '10/02/2025 20:00',
+      'image': 'https://example.com/chapati.jpg',
+      'location': 'Kolkata, India',
+      'donorName': 'Anil Gupta',
+      'donorVerification': 'Verified',
+      'latitude': '22.5726',
+      'longitude': '88.3639',
+    },
+    {
+      'foodName': 'Curd (Yogurt)',
+      'quantity': '2 liters',
+      'expirationDate': '10/02/2025 21:00',
+      'image': 'https://example.com/curd.jpg',
+      'location': 'Chennai, India',
+      'donorName': 'Ravi Singh',
+      'donorVerification': 'Unverified',
+      'latitude': '13.0827',
+      'longitude': '80.2707',
     },
   ];
 
@@ -91,7 +110,7 @@ class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen>
           double.parse(b['latitude']!),
           double.parse(b['longitude']!),
         );
-        return distanceA.compareTo(distanceB);
+        return distanceA.compareTo(distanceB); // Sort by distance in ascending order
       });
       setState(() {
         _isLoading = false;
@@ -172,8 +191,6 @@ class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen>
                           Text('Quantity: ${request['quantity']}'),
                           const SizedBox(height: 8),
                           Text('Expiration Date: ${request['expirationDate']}'),
-                          const SizedBox(height: 8),
-                          Text('Description: ${request['description']}'),
                           const SizedBox(height: 16),
                           Center(
                             child: ElevatedButton(

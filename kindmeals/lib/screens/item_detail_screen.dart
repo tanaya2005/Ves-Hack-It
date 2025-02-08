@@ -1,25 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:kindmeals/screens/chat_screen.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ItemDetailScreen extends StatelessWidget {
   final Map<String, String> request;
 
   const ItemDetailScreen({super.key, required this.request});
 
-  Future<void> _openMap(double latitude, double longitude) async {
-    final String googleMapsUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
-    if (await canLaunch(googleMapsUrl)) {
-      await launch(googleMapsUrl);
-    } else {
-      throw 'Could not open map';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    double latitude = double.parse(request['latitude']!);
-    double longitude = double.parse(request['longitude']!);
+    double.parse(request['latitude']!);
+    double.parse(request['longitude']!);
 
     return Scaffold(
       appBar: AppBar(
@@ -31,7 +22,8 @@ class ItemDetailScreen extends StatelessWidget {
         child: Column(
           children: <Widget>[
             Image.network(
-              request['image'] ?? 'https://i.ytimg.com/vi/fx3mg1ow3HA/maxresdefault.jpg',
+              request['image'] ??
+                  'https://i.ytimg.com/vi/fx3mg1ow3HA/maxresdefault.jpg',
               width: double.infinity,
               height: 250,
               fit: BoxFit.cover,
@@ -59,7 +51,8 @@ class ItemDetailScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChatScreen(recipientName: 'Donor'),
+                    builder: (context) => ChatScreen(
+                        recipientName: request['donorName'] ?? 'Donor'),
                   ),
                 );
               },
@@ -67,21 +60,9 @@ class ItemDetailScreen extends StatelessWidget {
                 backgroundColor: Colors.green,
                 minimumSize: const Size(double.infinity, 60),
               ),
-              child: const Text(
-                'Chat with Donor',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => _openMap(latitude, longitude),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                minimumSize: const Size(double.infinity, 60),
-              ),
-              child: const Text(
-                'Get Directions to Donor',
-                style: TextStyle(fontSize: 18),
+              child: Text(
+                'Chat with ${request['donorName'] ?? 'Donor'}',
+                style: const TextStyle(fontSize: 18),
               ),
             ),
           ],

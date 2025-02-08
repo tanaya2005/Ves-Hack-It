@@ -32,7 +32,7 @@ class Dashboard extends StatelessWidget {
               Navigator.push(context, MaterialPageRoute(builder: (_) => LiveDonationRequestsScreen()));
             }),
             _buildDashboardCard(Icons.monetization_on, 'Charity', () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const CharityScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (_) => CharityScreen()));
             }),
             _buildDashboardCard(Icons.location_on, 'Nearby NGOs', () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const NearbyNGOsScreen()));
