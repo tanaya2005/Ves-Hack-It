@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'chat_screen.dart';
+import 'chat_screen.dart' as chat;
 import 'profile_screen.dart';
 import 'post_donation_screen.dart';
 import 'live_requests_screen.dart';
@@ -29,7 +29,7 @@ class Dashboard extends StatelessWidget {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const PostDonationScreen()));
             }),
             _buildDashboardCard(Icons.request_page, 'Live Donation Requests', () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const LiveRequestsScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (_) => LiveDonationRequestsScreen()));
             }),
             _buildDashboardCard(Icons.monetization_on, 'Charity', () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const CharityScreen()));
@@ -51,7 +51,7 @@ class Dashboard extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const ChatScreen(recipientName: 'Varun'),
+              builder: (context) => const chat.ChatScreen(recipientName: 'Varun'),
             ),
           );
         },
