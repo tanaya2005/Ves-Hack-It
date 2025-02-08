@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 class WelcomeSplashScreen extends StatefulWidget {
+  const WelcomeSplashScreen({super.key});
+
   @override
   _WelcomeSplashScreenState createState() => _WelcomeSplashScreenState();
 }

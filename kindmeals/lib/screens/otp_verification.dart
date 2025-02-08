@@ -4,6 +4,8 @@ import '../widgets/custom_button.dart';
 class OTPVerificationScreen extends StatelessWidget {
   final TextEditingController otpController = TextEditingController();
 
+  OTPVerificationScreen({super.key});
+
   void _verifyOTP(BuildContext context) {
     if (otpController.text == '1234') {
       final role = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {'role': 'Donor'};

@@ -10,7 +10,7 @@ import 'screens/forgot_password.dart';
 import 'screens/role_selection.dart';
 // import 'screens/donor_dashboard.dart';
 // import 'screens/recipient_dashboard.dart';
-import 'screens/volunteer_dashboard.dart';
+// import 'screens/volunteer_dashboard.dart';
 import 'screens/chat_screen.dart';
 import 'screens/otp_verification.dart';
 
@@ -19,7 +19,7 @@ void main() {
 }
 
 class KindMealsApp extends StatelessWidget {
-  const KindMealsApp({Key? key}) : super(key: key);
+  const KindMealsApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,6 @@ class KindMealsApp extends StatelessWidget {
         '/signup': (context) => RegisterScreen(),
         '/otpVerification': (context) => OTPVerificationScreen(),
         '/dashboard': (context) => Dashboard(),
-        '/volunteerDashboard': (context) => VolunteerDashboard(),
         '/chatScreen': (context) => ChatScreen(recipientName: "Test User"),
       },
     );

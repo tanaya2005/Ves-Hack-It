@@ -4,6 +4,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart'; // Add this package for Facebook login
 
 class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
 }
@@ -215,13 +217,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _buildTextField(TextEditingController controller, String hintText,
       {bool isPassword = false,
       TextInputType keyboardType = TextInputType.text}) {
-    bool _obscureText = isPassword;
+    bool obscureText = isPassword;
 
     return StatefulBuilder(
       builder: (context, setState) {
         return TextField(
           controller: controller,
-          obscureText: _obscureText,
+          obscureText: obscureText,
           style: TextStyle(color: Colors.white),
           keyboardType: keyboardType,
           decoration: InputDecoration(
@@ -237,12 +239,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
             suffixIcon: isPassword
                 ? IconButton(
                     icon: Icon(
-                      _obscureText ? Icons.visibility_off : Icons.visibility,
+                      obscureText ? Icons.visibility_off : Icons.visibility,
                       color: Colors.white54,
                     ),
                     onPressed: () {
                       setState(() {
-                        _obscureText = !_obscureText;
+                        obscureText = !obscureText;
                       });
                     },
                   )

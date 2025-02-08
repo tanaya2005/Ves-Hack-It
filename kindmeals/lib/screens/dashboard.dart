@@ -1,4 +1,12 @@
 import 'package:flutter/material.dart';
+import 'chat_screen.dart';
+import 'profile_screen.dart';
+import 'post_donation_screen.dart';
+import 'live_requests_screen.dart';
+import 'charity_screen.dart';
+import 'nearby_ngos_screen.dart';
+import 'volunteer_screen.dart';
+import 'track_delivery_screen.dart';
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
@@ -17,56 +25,46 @@ class Dashboard extends StatelessWidget {
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
           children: [
-            _buildDashboardCard(
-              Icons.food_bank,
-              'Post Donation',
-              () {
-                // Navigate to Post Donation screen
-              },
-            ),
-            _buildDashboardCard(
-              Icons.request_page,
-              'Live Donation Requests',
-              () {
-                // Navigate to Requests screen
-              },
-            ),
-            _buildDashboardCard(
-              Icons.location_on,
-              'Nearby Donors',
-              () {
-                // Navigate to Nearby NGOs/Donors screen
-              },
-            ),
-            _buildDashboardCard(
-              Icons.location_on,
-              'Nearby NGOs',
-              () {
-                // Navigate to Nearby NGOs/Donors screen
-              },
-            ),
-            _buildDashboardCard(
-              Icons.volunteer_activism,
-              'Volunteer',
-              () {
-                // Navigate to Volunteers screen
-              },
-            ),
-            _buildDashboardCard(
-              Icons.chat,
-              'Chat',
-              () {
-                // Navigate to Chat screen
-              },
-            ),
+            _buildDashboardCard(Icons.food_bank, 'Post Donation', () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const PostDonationScreen()));
+            }),
+            _buildDashboardCard(Icons.request_page, 'Live Donation Requests', () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const LiveRequestsScreen()));
+            }),
+            _buildDashboardCard(Icons.monetization_on, 'Charity', () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const CharityScreen()));
+            }),
+            _buildDashboardCard(Icons.location_on, 'Nearby NGOs', () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const NearbyNGOsScreen()));
+            }),
+            _buildDashboardCard(Icons.volunteer_activism, 'Volunteer', () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const VolunteerScreen()));
+            }),
+            _buildDashboardCard(Icons.delivery_dining, 'Track Delivery', () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const TrackDeliveryScreen()));
+            }),
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ChatScreen(recipientName: 'Varun'),
+            ),
+          );
+        },
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.chat),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 0,
-        type: BottomNavigationBarType.fixed, // Set the initial selected index
+        type: BottomNavigationBarType.fixed,
         onTap: (index) {
-          // Handle bottom navigation tap
+          if (index == 3) {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+          }
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
