@@ -52,7 +52,8 @@ class ItemDetailScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => ChatScreen(
-                        recipientName: request['donorName'] ?? 'Donor'),
+                        // ignore: avoid_types_as_parameter_names, non_constant_identifier_names
+                        recipientName: request['donorName'] ?? 'Donor', onMessageSent: (String ) {  },),
                   ),
                 );
               },

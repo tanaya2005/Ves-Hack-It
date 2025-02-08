@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'chat_screen.dart' as chat;
+import 'chat_screen.dart';
 import 'profile_screen.dart';
 import 'post_donation_screen.dart';
 import 'live_requests_screen.dart';
@@ -7,6 +7,19 @@ import 'charity_screen.dart';
 import 'nearby_ngos_screen.dart';
 import 'volunteer_screen.dart';
 import 'track_delivery_screen.dart';
+
+// Dummy data for recent chats
+class RecentChat {
+  final String recipientName;
+  final String lastMessage;
+  final String time;
+
+  RecentChat({
+    required this.recipientName,
+    required this.lastMessage,
+    required this.time,
+  });
+}
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
@@ -48,10 +61,11 @@ class Dashboard extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          // Navigate to the recent chats screen
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const chat.ChatScreen(recipientName: 'Varun'),
+              builder: (context) => RecentChatsScreen(),
             ),
           );
         },
@@ -97,6 +111,53 @@ class Dashboard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// Recent Chats Screen
+class RecentChatsScreen extends StatelessWidget {
+  const RecentChatsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final List<RecentChat> recentChats = [
+      RecentChat(recipientName: 'Donor 1', lastMessage: 'Looking forward to your help.', time: '10:30 AM'),
+      RecentChat(recipientName: 'Donor 2', lastMessage: 'I will deliver the food soon.', time: '9:15 AM'),
+      RecentChat(recipientName: 'Donor 3', lastMessage: 'I have confirmed the donation.', time: 'Yesterday'),
+    ];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Recent Chats'),
+        backgroundColor: Colors.green,
+      ),
+      body: ListView.builder(
+        itemCount: recentChats.length,
+        itemBuilder: (context, index) {
+          final chat = recentChats[index];
+          return ListTile(
+            onTap: () {
+              // Navigate to the chat screen with the recipient's name
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  // ignore: avoid_types_as_parameter_names, non_constant_identifier_names
+                  builder: (context) => ChatScreen(recipientName: chat.recipientName, onMessageSent: (String ) {  },),
+                ),
+              );
+            },
+            leading: CircleAvatar(
+              backgroundColor: Colors.green, // First letter of recipient name
+              foregroundColor: Colors.white,
+              child: Text(chat.recipientName[0]),
+            ),
+            title: Text(chat.recipientName),
+            subtitle: Text(chat.lastMessage),
+            trailing: Text(chat.time),
+          );
+        },
       ),
     );
   }

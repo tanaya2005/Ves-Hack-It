@@ -1,91 +1,168 @@
 import 'package:flutter/material.dart';
 
-class CharityScreen extends StatelessWidget {
-  CharityScreen({super.key});
+class CharityScreen extends StatefulWidget {
+  const CharityScreen({super.key});
 
-  // Sample list of charities, you can replace this with dynamic data from your backend.
-  final List<Map<String, String>> charities = [
-    {'name': 'Food for All', 'description': 'Help us provide food to those in need.'},
-    {'name': 'Education for Children', 'description': 'Sponsor a child\'s education.'},
-    {'name': 'Medical Aid', 'description': 'Support those with medical needs.'},
-  ];
+  @override
+  _CharityScreenState createState() => _CharityScreenState();
+}
+
+class _CharityScreenState extends State<CharityScreen> {
+  String amount = '';
+  String paymentMethod = 'upi';
+
+  void handleAmountClick(String value) {
+    setState(() {
+      amount = value;
+    });
+  }
+
+  void handleDonate() {
+    if (amount.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              'Thank you for donating ₹$amount via ${paymentMethod.toUpperCase()}! ❤'),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter or select an amount to donate.'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Charity'),
+        title: const Text('Charity Donation'),
         backgroundColor: Colors.green,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            const Text(
-              'Support a Charity',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Choose a charity to support and make a difference.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-            const SizedBox(height: 30),
-            Expanded(
-              child: ListView.builder(
-                itemCount: charities.length,
-                itemBuilder: (context, index) {
-                  return CharityCard(
-                    name: charities[index]['name']!,
-                    description: charities[index]['description']!,
-                    onTap: () {
-                      // You can navigate to a detailed charity page or donation page here
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Supporting: ${charities[index]['name']}')),
-                      );
-                    },
-                  );
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Help the Needy, Donate Today ❤',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'Your small contribution can make a big difference in someone\'s life.',
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
+              const SizedBox(height: 20),
+
+              // Donation Amount Selection
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => handleAmountClick('100'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                    ), // Highlight the button
+                    child: const Text('₹100'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => handleAmountClick('500'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                    ),
+                    child: const Text('₹500'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => handleAmountClick('1000'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                    ),
+                    child: const Text('₹1000'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              // Custom Amount Input
+              TextField(
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Enter Custom Amount (₹)',
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    amount = value;
+                  });
                 },
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+              const SizedBox(height: 20),
 
-class CharityCard extends StatelessWidget {
-  final String name;
-  final String description;
-  final VoidCallback onTap;
+              // Impact Section
+              const Text(
+                'How Your Donation Helps:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text('💖 ₹100 - Provides a meal for a family in need.'),
+              const Text(
+                  '📚 ₹500 - Supports education for an underprivileged child.'),
+              const Text(
+                  '🏥 ₹1000 - Helps fund medical assistance for the needy.'),
+              const SizedBox(height: 20),
 
-  const CharityCard({
-    super.key,
-    required this.name,
-    required this.description,
-    required this.onTap,
-  });
+              // Payment Method Selection
+              const Text(
+                'Select Payment Method:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              ListTile(
+                title: const Text('UPI'),
+                leading: Radio(
+                  value: 'upi',
+                  groupValue: paymentMethod,
+                  onChanged: (value) {
+                    setState(() {
+                      paymentMethod = value.toString();
+                    });
+                  },
+                ),
+              ),
+              ListTile(
+                title: const Text('Credit/Debit Card'),
+                leading: Radio(
+                  value: 'credit-debit',
+                  groupValue: paymentMethod,
+                  onChanged: (value) {
+                    setState(() {
+                      paymentMethod = value.toString();
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
 
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      elevation: 5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16.0),
-        title: Text(
-          name,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              // Donate Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: handleDonate,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child:
+                      const Text('Donate Now', style: TextStyle(fontSize: 18)),
+                ),
+              ),
+            ],
+          ),
         ),
-        subtitle: Text(
-          description,
-          style: const TextStyle(color: Colors.grey),
-        ),
-        trailing: Icon(Icons.arrow_forward, color: Colors.green),
-        onTap: onTap,
       ),
     );
   }

@@ -38,7 +38,8 @@ class KindMealsApp extends StatelessWidget {
         '/signup': (context) => RegisterScreen(),
         '/otpVerification': (context) => OTPVerificationScreen(),
         '/dashboard': (context) => Dashboard(),
-        '/chatScreen': (context) => ChatScreen(recipientName: "Test User"),
+        // ignore: avoid_types_as_parameter_names, non_constant_identifier_names
+        '/chatScreen': (context) => ChatScreen(recipientName: "Test User", onMessageSent: (String ) {  },),
       },
     );
   }

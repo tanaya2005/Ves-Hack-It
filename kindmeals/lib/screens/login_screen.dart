@@ -14,7 +14,8 @@ class LoginScreen extends StatelessWidget {
     try {
       final account = await googleSignIn.signIn();
       if (account != null) {
-        Navigator.pushReplacementNamed(context, '/dashboard'); // Redirect to dashboard
+        Navigator.pushReplacementNamed(
+            context, '/dashboard'); // Redirect to dashboard
       }
     } catch (error) {
       print('Google Sign-In Error: $error');
@@ -24,7 +25,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -34,29 +35,33 @@ class LoginScreen extends StatelessWidget {
               children: [
                 Text(
                   'Welcome Back!',
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
                 ),
                 SizedBox(height: 10),
                 Text(
                   'Login to your account',
-                  style: TextStyle(fontSize: 18, color: Colors.white70),
+                  style: TextStyle(fontSize: 18, color: Colors.black54),
                 ),
                 SizedBox(height: 30),
 
                 // Email Field
                 TextField(
                   controller: emailController,
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Colors.black),
                   decoration: InputDecoration(
                     hintText: 'Email',
-                    hintStyle: TextStyle(color: Colors.white54),
+                    hintStyle: TextStyle(color: Colors.black45),
                     filled: true,
-                    fillColor: Colors.grey[900],
+                    fillColor: Colors.grey[200],
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
                     ),
-                    contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                   ),
                 ),
                 SizedBox(height: 20),
@@ -65,17 +70,18 @@ class LoginScreen extends StatelessWidget {
                 TextField(
                   controller: passwordController,
                   obscureText: true,
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Colors.black),
                   decoration: InputDecoration(
                     hintText: 'Password',
-                    hintStyle: TextStyle(color: Colors.white54),
+                    hintStyle: TextStyle(color: Colors.black45),
                     filled: true,
-                    fillColor: Colors.grey[900],
+                    fillColor: Colors.grey[200],
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
                     ),
-                    contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                   ),
                 ),
                 SizedBox(height: 10),
@@ -87,7 +93,14 @@ class LoginScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.pushNamed(context, '/forgotPassword');
                     },
-                    child: Text('Forgot Password?', style: TextStyle(color: Colors.white70)),
+                    child: Text(
+                      'Forgot Password?',
+                      style: TextStyle(
+                        color: Colors.blue, // Change text color to green
+                        decoration:
+                            TextDecoration.underline, // Underline the text
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(height: 20),
@@ -97,12 +110,14 @@ class LoginScreen extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/dashboard'); // Replace with actual login logic
+                      Navigator.pushReplacementNamed(context,
+                          '/dashboard'); // Replace with actual login logic
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       padding: EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text('Login', style: TextStyle(fontSize: 18)),
                   ),
@@ -112,12 +127,15 @@ class LoginScreen extends StatelessWidget {
                 // Divider
                 Row(
                   children: [
-                    Expanded(child: Divider(color: Colors.white24, thickness: 1)),
+                    Expanded(
+                        child: Divider(color: Colors.black26, thickness: 1)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text('OR', style: TextStyle(color: Colors.white54)),
+                      child:
+                          Text('OR', style: TextStyle(color: Colors.black54)),
                     ),
-                    Expanded(child: Divider(color: Colors.white24, thickness: 1)),
+                    Expanded(
+                        child: Divider(color: Colors.black26, thickness: 1)),
                   ],
                 ),
                 SizedBox(height: 20),
@@ -130,10 +148,14 @@ class LoginScreen extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
-                    icon: Image.asset('assets/google_logo.png', height: 24), // Add Google logo in assets
-                    label: Text('Continue with Google', style: TextStyle(color: Colors.black, fontSize: 16)),
+                    icon: Image.network(
+                        'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/2048px-Google_%22G%22_logo.svg.png',
+                        height: 24), // Network image for Google logo
+                    label: Text('Continue with Google',
+                        style: TextStyle(color: Colors.black, fontSize: 16)),
                   ),
                 ),
                 SizedBox(height: 10),
@@ -142,12 +164,14 @@ class LoginScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Don\'t have an account?', style: TextStyle(color: Colors.white70)),
+                    Text('Don\'t have an account?',
+                        style: TextStyle(color: Colors.black54)),
                     TextButton(
                       onPressed: () {
                         Navigator.pushNamed(context, '/signup');
                       },
-                      child: Text('Sign Up', style: TextStyle(color: Colors.green)),
+                      child: Text('Sign Up',
+                          style: TextStyle(color: Colors.green)),
                     ),
                   ],
                 ),

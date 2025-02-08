@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:kindmeals/screens/register_login.dart';
+import 'edit_profile_screen.dart'; // Import the EditProfileScreen
+import 'change_password_screen.dart'; // Import the ChangePasswordScreen
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   final bool isVolunteer;
 
   const ProfileScreen({super.key, this.isVolunteer = false});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  String name = 'Bhuki Margret';
+  String email = 'khanadedo@ngo.com';
+  String phone = '99999922288';
+  String location = 'Shaitaan Gali, Khatra Mahal, Shamsaan ke saamne';
+  String organization = 'Helping Hands';
+  String about = 'We are here to help.';
+  String currentPassword = 'password123'; // Placeholder for current password
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +34,7 @@ class ProfileScreen extends StatelessWidget {
               color: Colors.black,
             ),
             onPressed: () {
-              // Navigate to Chat Screen
+              // Navigate to Settings Screen
             },
           ),
         ],
@@ -30,40 +46,130 @@ class ProfileScreen extends StatelessWidget {
           children: [
             Center(
               child: Column(
-                children: const [
-                  CircleAvatar(
+                children: [
+                  const CircleAvatar(
                     radius: 50,
                     backgroundImage: NetworkImage(
                       'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQA8wdinI12oeDwYnTw1KE96jlZDywL_doY_A&s',
                     ),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Text(
-                    'Bhuki Margret',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    name,
+                    style: const TextStyle(
+                        fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    'khanadedo@ngo.com',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    email,
+                    style: const TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
             _buildProfileSection('Account Details', [
-              _buildInfoRow(Icons.phone, 'Phone', '99999922288'),
-              _buildInfoRow(Icons.location_on, 'Location', 'Shaitaan Gali, Khatra Mahal, Shamsaan ke saamne'),
-              _buildInfoRow(Icons.business, 'Organization', 'Helping Hands'),
-              _buildInfoRow(Icons.info, 'About', 'We are here to help.'),
+              _buildInfoRow(Icons.phone, 'Phone', phone),
+              _buildInfoRow(Icons.location_on, 'Location', location),
+              _buildInfoRow(Icons.business, 'Organization', organization),
+              _buildInfoRow(Icons.info, 'About', about),
             ]),
             const SizedBox(height: 16),
-            _buildProfileSection('Settings', [
-              _buildSettingsTile(Icons.edit, 'Edit Profile', () {}),
-              _buildSettingsTile(Icons.lock, 'Change Password', () {}),
-              _buildSettingsTile(Icons.language, 'Language Preferences', () {}),
-              _buildSettingsTile(Icons.logout, 'Logout', () {}),
-            ]),
-            if (isVolunteer) ...[
+            _buildProfileSection(
+              'Settings',
+              [
+                _buildSettingsTile(Icons.edit, 'Edit Profile', () async {
+                  final updatedProfile = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditProfileScreen(
+                        name: name,
+                        email: email,
+                        phone: phone,
+                        location: location,
+                        organization: organization,
+                        about: about,
+                      ),
+                    ),
+                  );
+
+                  if (updatedProfile != null) {
+                    setState(() {
+                      name = updatedProfile['name'];
+                      email = updatedProfile['email'];
+                      phone = updatedProfile['phone'];
+                      location = updatedProfile['location'];
+                      organization = updatedProfile['organization'];
+                      about = updatedProfile['about'];
+                    });
+                  }
+                }),
+                _buildSettingsTile(Icons.lock, 'Change Password', () async {
+                  final newPassword = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChangePasswordScreen(
+                          currentPassword: currentPassword),
+                    ),
+                  );
+
+                  if (newPassword != null) {
+                    setState(() {
+                      currentPassword = newPassword;
+                    });
+                  }
+                }),
+                _buildSettingsTile(
+                    Icons.language, 'Language Preferences', () {}),
+                _buildSettingsTile(Icons.logout, 'Logout', () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Are you sure you want to log out?'),
+                        actions: [
+                          TextButton(
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(color: Colors.black),
+                            ),
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Close the dialog
+                            },
+                          ),
+                          TextButton(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Text(
+                                'Yes',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Close the dialog
+                              // Navigate to RegisterLoginPage
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const RegisterLoginPage()));
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }),
+              ],
+            ),
+            if (widget.isVolunteer) ...[
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
