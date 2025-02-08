@@ -1,4 +1,4 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: library_private_types_in_public_api, avoid_print, use_build_context_synchronously
 
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -67,7 +67,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white, // Changed background color to white
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -80,7 +80,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white),
+                      color: Colors.black), // Changed color to black
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Register to your account',
+                  style: TextStyle(fontSize: 18, color: Colors.black54),
                 ),
                 SizedBox(height: 30),
 
@@ -123,7 +128,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ElevatedButton(
                     onPressed: _verifyOtp,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: Colors.green, // Color changed to match Login button
                       padding: EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
@@ -138,14 +143,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Row(
                   children: [
                     Expanded(
-                        child: Divider(color: Colors.white24, thickness: 1)),
+                        child: Divider(color: Colors.black26, thickness: 1)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child:
-                          Text('OR', style: TextStyle(color: Colors.white54)),
+                          Text('OR', style: TextStyle(color: Colors.black54)),
                     ),
                     Expanded(
-                        child: Divider(color: Colors.white24, thickness: 1)),
+                        child: Divider(color: Colors.black26, thickness: 1)),
                   ],
                 ),
                 SizedBox(height: 20),
@@ -175,7 +180,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text('Already have an account?',
-                        style: TextStyle(color: Colors.white70)),
+                        style: TextStyle(color: Colors.black54)),
                     TextButton(
                       onPressed: () {
                         Navigator.pushNamed(context, '/login');
@@ -203,13 +208,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
         return TextField(
           controller: controller,
           obscureText: obscureText,
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black), // Changed text color to black
           keyboardType: keyboardType,
           decoration: InputDecoration(
             hintText: hintText,
-            hintStyle: TextStyle(color: Colors.white54),
+            hintStyle: TextStyle(color: Colors.black45), // Changed hint color
             filled: true,
-            fillColor: Colors.grey[900],
+            fillColor: Colors.grey[200], // Changed to match Login field color
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -219,7 +224,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ? IconButton(
                     icon: Icon(
                       obscureText ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.white54,
+                      color: Colors.black54,
                     ),
                     onPressed: () {
                       setState(() {

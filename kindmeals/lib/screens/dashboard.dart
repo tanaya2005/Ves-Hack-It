@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kindmeals/screens/donation_history_screen.dart';
+import 'package:kindmeals/screens/notification_screen.dart';
 import 'chat_screen.dart';
 import 'profile_screen.dart';
 import 'post_donation_screen.dart';
@@ -78,6 +80,12 @@ class Dashboard extends StatelessWidget {
         onTap: (index) {
           if (index == 3) {
             Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+          }
+          else if (index == 1) {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationScreen()));
+          }
+          else if (index == 2) {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const DonationHistoryScreen()));
           }
         },
         items: const [
