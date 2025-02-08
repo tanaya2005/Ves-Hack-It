@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 
 class DonationHistoryScreen extends StatelessWidget {
-  const DonationHistoryScreen({Key? key}) : super(key: key);
+  const DonationHistoryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
