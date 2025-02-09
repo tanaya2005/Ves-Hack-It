@@ -1,7 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api, avoid_print, use_build_context_synchronously
 
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -17,57 +17,63 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
-  final TextEditingController otpController = TextEditingController();
 
-  bool isOtpSent = false;
-  String generatedOtp = "";
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  void _sendOtp() {
-    if (nameController.text.isEmpty ||
-        emailController.text.isEmpty ||
-        passwordController.text.isEmpty ||
-        phoneController.text.isEmpty ||
-        addressController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please fill all fields.")),
-      );
-      return;
-    }
-    setState(() {
-      generatedOtp = (1000 + Random().nextInt(9000)).toString();
-      isOtpSent = true;
-    });
-    print("OTP sent to Email & Phone: $generatedOtp");
-  }
-
-  void _verifyOtp() {
-    if (otpController.text == generatedOtp) {
-      Navigator.pushReplacementNamed(context, '/dashboard');
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Invalid OTP. Please try again.")),
-      );
-    }
-  }
-
-  // Google Sign-In
-  void _signInWithGoogle(BuildContext context) async {
-    final GoogleSignIn googleSignIn = GoogleSignIn();
+  Future<void> _registerWithEmail(BuildContext context) async {
     try {
-      final account = await googleSignIn.signIn();
+      await _auth.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+      Navigator.pushReplacementNamed(context, '/dashboard');
+    } catch (e) {
+      print('Email Registration Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    }
+  }
+
+  Future<void> _signInWithGoogle(BuildContext context) async {
+    final GoogleSignIn googleSignIn = GoogleSignIn(signInOption: SignInOption.standard);
+    try {
+      await googleSignIn.signOut();
+      final GoogleSignInAccount? account = await googleSignIn.signIn();
       if (account != null) {
-        Navigator.pushReplacementNamed(
-            context, '/dashboard'); // Redirect to dashboard
+        final GoogleSignInAuthentication googleAuth = await account.authentication;
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        await _auth.signInWithCredential(credential);
+        Navigator.pushReplacementNamed(context, '/dashboard');
       }
     } catch (error) {
       print('Google Sign-In Error: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google Sign-In Failed')),
+      );
     }
+  }
+
+  Widget _buildTextField(TextEditingController controller, String hint,
+      {bool isPassword = false, TextInputType keyboardType = TextInputType.text}) {
+    return TextField(
+      controller: controller,
+      obscureText: isPassword,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        hintText: hint,
+        border: OutlineInputBorder(),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Changed background color to white
+      backgroundColor: Colors.white,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -75,118 +81,67 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Create Account',
-                  style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black), // Changed color to black
-                ),
+                Text('Create Account', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
                 SizedBox(height: 10),
-                Text(
-                  'Register to your account',
-                  style: TextStyle(fontSize: 18, color: Colors.black54),
-                ),
+                Text('Register to your account', style: TextStyle(fontSize: 18, color: Colors.black54)),
                 SizedBox(height: 30),
 
                 _buildTextField(nameController, 'Name'),
                 SizedBox(height: 20),
-
                 _buildTextField(emailController, 'Email'),
                 SizedBox(height: 20),
-
-                _buildTextField(passwordController, 'Password',
-                    isPassword: true),
+                _buildTextField(passwordController, 'Password', isPassword: true),
                 SizedBox(height: 20),
-
-                _buildTextField(phoneController, 'Phone Number',
-                    keyboardType: TextInputType.phone),
+                _buildTextField(phoneController, 'Phone Number', keyboardType: TextInputType.phone),
                 SizedBox(height: 20),
-
                 _buildTextField(addressController, 'Address'),
                 SizedBox(height: 20),
 
-                // Register Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _sendOtp,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: Text('Register', style: TextStyle(fontSize: 18)),
-                  ),
+                ElevatedButton(
+                  onPressed: () => _registerWithEmail(context),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green, minimumSize: Size(double.infinity, 50)),
+                  child: Text('Register'),
                 ),
-
-                if (isOtpSent) ...[
-                  SizedBox(height: 20),
-                  _buildTextField(otpController, 'Enter OTP'),
-                  SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: _verifyOtp,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green, // Color changed to match Login button
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: Text('Verify OTP'),
-                  ),
-                ],
-
                 SizedBox(height: 20),
 
-                // Divider
                 Row(
                   children: [
-                    Expanded(
-                        child: Divider(color: Colors.black26, thickness: 1)),
+                    Expanded(child: Divider(thickness: 1)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child:
-                          Text('OR', style: TextStyle(color: Colors.black54)),
+                      child: Text('OR', style: TextStyle(color: Colors.black54)),
                     ),
-                    Expanded(
-                        child: Divider(color: Colors.black26, thickness: 1)),
+                    Expanded(child: Divider(thickness: 1)),
                   ],
                 ),
                 SizedBox(height: 20),
 
-                // Google Sign-In Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () => _signInWithGoogle(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    icon: Image.network(
-                        'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/2048px-Google_%22G%22_logo.svg.png',
-                        height: 24), // Network image for Google logo
-                    label: Text('Continue with Google',
-                        style: TextStyle(color: Colors.black, fontSize: 16)),
+                ElevatedButton(
+                  onPressed: () => _signInWithGoogle(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    minimumSize: Size(double.infinity, 50),
+                    side: BorderSide(color: Colors.grey),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset('assets/google_logo.png', height: 24),
+                      SizedBox(width: 10),
+                      Text('Continue with Google'),
+                    ],
                   ),
                 ),
                 SizedBox(height: 10),
 
-                // Login Option
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Already have an account?',
-                        style: TextStyle(color: Colors.black54)),
+                    Text('Already have an account?'),
                     TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/login');
-                      },
-                      child:
-                          Text('Login', style: TextStyle(color: Colors.green)),
+                      onPressed: () => Navigator.pushNamed(context, '/login'),
+                      child: Text('Login'),
                     ),
                   ],
                 ),
@@ -195,47 +150,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTextField(TextEditingController controller, String hintText,
-      {bool isPassword = false,
-      TextInputType keyboardType = TextInputType.text}) {
-    bool obscureText = isPassword;
-
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return TextField(
-          controller: controller,
-          obscureText: obscureText,
-          style: TextStyle(color: Colors.black), // Changed text color to black
-          keyboardType: keyboardType,
-          decoration: InputDecoration(
-            hintText: hintText,
-            hintStyle: TextStyle(color: Colors.black45), // Changed hint color
-            filled: true,
-            fillColor: Colors.grey[200], // Changed to match Login field color
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-            suffixIcon: isPassword
-                ? IconButton(
-                    icon: Icon(
-                      obscureText ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.black54,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        obscureText = !obscureText;
-                      });
-                    },
-                  )
-                : null,
-          ),
-        );
-      },
     );
   }
 }
