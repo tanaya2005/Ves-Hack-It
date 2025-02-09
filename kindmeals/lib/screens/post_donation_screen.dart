@@ -1,8 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:dio/dio.dart';
 
 class PostDonationScreen extends StatefulWidget {
   const PostDonationScreen({super.key});
@@ -14,7 +13,7 @@ class PostDonationScreen extends StatefulWidget {
 class _PostDonationScreenState extends State<PostDonationScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _quantityController = TextEditingController();
-  final TextEditingController _expirationDateController =
+  final TextEditingController _expiryDateController =
       TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _foodNameController = TextEditingController();
@@ -22,6 +21,7 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
   bool _isVeg = false;
   bool _isNonVeg = false;
   TimeOfDay? _selectedTime;
+  bool _isLoading = false;
 
   final List<String> _foodSuggestions = [
     'Vegetables',
@@ -32,10 +32,21 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
     'Other',
   ];
 
+  @override
+  void dispose() {
+    _quantityController.dispose();
+    _expiryDateController.dispose();
+    _descriptionController.dispose();
+    _foodNameController.dispose();
+    super.dispose();
+  }
+
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final XFile? pickedFile =
-        await picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
     if (pickedFile != null) {
       setState(() {
         _image = pickedFile;
@@ -55,59 +66,90 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
     }
   }
 
-  Future<String?> _uploadImage(XFile image) async {
-    try {
-      // Generate a unique file name for the image
-      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      // Upload image to Firebase Storage
-      UploadTask uploadTask = FirebaseStorage.instance
-          .ref()
-          .child('donations/images/$fileName')
-          .putFile(File(image.path));
-      TaskSnapshot snapshot = await uploadTask;
-      // Get the download URL of the uploaded image
-      String downloadUrl = await snapshot.ref.getDownloadURL();
-      return downloadUrl;
-    } catch (e) {
-      print("Error uploading image: $e");
-      return null;
-    }
-  }
-
-  void _submitDonation() async {
+  Future<void> _submitDonation() async {
     if (_formKey.currentState?.validate() ?? false) {
-      String? imageUrl = _image != null ? await _uploadImage(_image!) : null;
-      if (imageUrl != null) {
-        // Create a donation object to send to Firestore
-        Map<String, dynamic> donationData = {
-          'foodName': _foodNameController.text,
-          'quantity': int.parse(_quantityController.text),
-          'description': _descriptionController.text,
-          'expirationDate': _expirationDateController.text,
-          'isVeg': _isVeg,
-          'isNonVeg': _isNonVeg,
-          'imageUrl': imageUrl,
-          'timestamp': FieldValue.serverTimestamp(),
-        };
+      setState(() {
+        _isLoading = true;
+      });
 
-        // Save donation data to Firestore
-        await FirebaseFirestore.instance.collection('donations').add(donationData);
+      try {
+        var dio = Dio();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Donation posted successfully!')),
+        // Create form data
+        var formData = FormData();
+
+        // Add text fields
+        formData.fields.addAll([
+          MapEntry('foodName', _foodNameController.text),
+          MapEntry('quantity', _quantityController.text),
+          MapEntry('description', _descriptionController.text),
+          MapEntry('expiryDate', _expiryDateController.text),
+          MapEntry('isVeg', _isVeg.toString()),
+          MapEntry('isNonVeg', _isNonVeg.toString()),
+          // MapEntry('donorName', _donorNameController.text), // Replace with actual donor name
+        ]);
+
+        // Add image if selected
+        if (_image != null) {
+          formData.files.add(MapEntry(
+            'image',
+            await MultipartFile.fromFile(_image!.path,
+                filename: 'donation_image.jpg'),
+          ));
+        }
+
+        // Send request
+        var response = await dio.post(
+          'http://192.168.0.100:3000/api/donations', // Updated with your IP
+          data: formData,
+          options: Options(
+            headers: {
+              'Accept': 'application/json',
+            },
+          ),
         );
 
-        // Reset form after successful submission
-        _formKey.currentState?.reset();
-        setState(() {
-          _image = null;
-          _isVeg = false;
-          _isNonVeg = false;
-        });
-      } else {
+        if (response.statusCode == 201) {
+          if (!mounted) return;
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Donation posted successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          // Reset form
+          _formKey.currentState?.reset();
+          setState(() {
+            _image = null;
+            _isVeg = false;
+            _isNonVeg = false;
+            _foodNameController.clear();
+            _quantityController.clear();
+            _descriptionController.clear();
+            _expiryDateController.clear();
+            _selectedTime = null;
+          });
+        } else {
+          if (!mounted) return;
+          throw Exception(
+              'Failed to post donation. Status: ${response.statusCode}');
+        }
+      } catch (e) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to upload image')),
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
         );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
@@ -116,15 +158,17 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 30)),
     );
     if (pickedDate != null) {
-      _selectTime();
-      setState(() {
-        _expirationDateController.text =
-            '${pickedDate.day}/${pickedDate.month}/${pickedDate.year} ${_selectedTime?.format(context)}';
-      });
+      await _selectTime();
+      if (_selectedTime != null) {
+        setState(() {
+          _expiryDateController.text =
+              '${pickedDate.day}/${pickedDate.month}/${pickedDate.year} ${_selectedTime!.format(context)}';
+        });
+      }
     }
   }
 
@@ -132,149 +176,223 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text('Post Donation'), backgroundColor: Colors.green),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Card(
-          elevation: 5,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          child: Padding(
+        title: const Text('Post Donation'),
+        backgroundColor: Colors.green,
+      ),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  GestureDetector(
-                    onTap: _pickImage,
-                    child: _image == null
-                        ? Container(
-                            width: double.infinity,
-                            height: 200,
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.add_a_photo,
-                                size: 50, color: Colors.grey),
-                          )
-                        : Image.file(File(_image!.path),
-                            width: double.infinity,
-                            height: 200,
-                            fit: BoxFit.cover),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
+            child: Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Checkbox(
-                        value: _isVeg,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            _isVeg = value ?? false;
+                      GestureDetector(
+                        onTap: _isLoading ? null : _pickImage,
+                        child: Container(
+                          width: double.infinity,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: _image == null
+                              ? const Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.add_a_photo,
+                                          size: 50, color: Colors.grey),
+                                      SizedBox(height: 8),
+                                      Text('Tap to add photo',
+                                          style: TextStyle(color: Colors.grey)),
+                                    ],
+                                  ),
+                                )
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.file(
+                                    File(_image!.path),
+                                    width: double.infinity,
+                                    height: 200,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: CheckboxListTile(
+                              title: const Text('Vegetarian'),
+                              value: _isVeg,
+                              onChanged: _isLoading
+                                  ? null
+                                  : (bool? value) {
+                                      setState(() {
+                                        _isVeg = value ?? false;
+                                        if (_isVeg) _isNonVeg = false;
+                                      });
+                                    },
+                            ),
+                          ),
+                          Expanded(
+                            child: CheckboxListTile(
+                              title: const Text('Non-Vegetarian'),
+                              value: _isNonVeg,
+                              onChanged: _isLoading
+                                  ? null
+                                  : (bool? value) {
+                                      setState(() {
+                                        _isNonVeg = value ?? false;
+                                        if (_isNonVeg) _isVeg = false;
+                                      });
+                                    },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Autocomplete<String>(
+                        optionsBuilder: (TextEditingValue textEditingValue) {
+                          if (textEditingValue.text.isEmpty) {
+                            return const Iterable<String>.empty();
+                          }
+                          return _foodSuggestions.where((food) {
+                            return food
+                                .toLowerCase()
+                                .contains(textEditingValue.text.toLowerCase());
                           });
                         },
-                      ),
-                      const Text('Veg'),
-                      const SizedBox(width: 16),
-                      Checkbox(
-                        value: _isNonVeg,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            _isNonVeg = value ?? false;
-                          });
+                        onSelected: (String selection) {
+                          _foodNameController.text = selection;
+                        },
+                        fieldViewBuilder: (context, controller, focusNode,
+                            onEditingComplete) {
+                          return TextFormField(
+                            controller: controller,
+                            focusNode: focusNode,
+                            onEditingComplete: onEditingComplete,
+                            decoration: InputDecoration(
+                              labelText: 'Food Name',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              enabled: !_isLoading,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter the food name';
+                              }
+                              return null;
+                            },
+                          );
                         },
                       ),
-                      const Text('Non-Veg'),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Autocomplete<String>( // Autocomplete for food suggestions
-                    optionsBuilder: (TextEditingValue textEditingValue) {
-                      if (textEditingValue.text.isEmpty) {
-                        return const Iterable<String>.empty();
-                      }
-                      return _foodSuggestions.where((food) {
-                        return food
-                            .toLowerCase()
-                            .contains(textEditingValue.text.toLowerCase());
-                      });
-                    },
-                    onSelected: (String selection) {
-                      _foodNameController.text = selection;
-                    },
-                    fieldViewBuilder:
-                        (context, controller, focusNode, onEditingComplete) {
-                      return TextField(
-                        controller: controller,
-                        focusNode: focusNode,
-                        decoration: const InputDecoration(
-                          labelText: 'Food Name',
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _quantityController,
+                        decoration: InputDecoration(
+                          labelText: 'Quantity',
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _quantityController,
-                    decoration: const InputDecoration(labelText: 'Quantity'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter the quantity';
-                      }
-                      if (int.tryParse(value) == null) {
-                        return 'Please enter a valid number';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _descriptionController,
-                    decoration: const InputDecoration(labelText: 'Description'),
-                    maxLines: 3,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a description';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _expirationDateController,
-                    decoration: const InputDecoration(
-                        labelText: 'Expiry Date and Time'),
-                    keyboardType: TextInputType.datetime,
-                    readOnly: true,
-                    onTap: _selectDateAndTime,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select an expiration date and time';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: _submitDonation,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        minimumSize: const Size(double.infinity, 60),
+                        enabled: !_isLoading,
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter the quantity';
+                          }
+                          if (int.tryParse(value) == null) {
+                            return 'Please enter a valid number';
+                          }
+                          return null;
+                        },
                       ),
-                      child: const Text(
-                        'Submit Donation',
-                        style: TextStyle(fontSize: 18),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _descriptionController,
+                        decoration: InputDecoration(
+                          labelText: 'Description',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        enabled: !_isLoading,
+                        maxLines: 3,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a description';
+                          }
+                          return null;
+                        },
                       ),
-                    ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _expiryDateController,
+                        decoration: InputDecoration(
+                          labelText: 'Expiry Date and Time',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        enabled: !_isLoading,
+                        readOnly: true,
+                        onTap: _isLoading ? null : _selectDateAndTime,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please select an expiry date and time';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _submitDonation,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text(
+                                  'Submit Donation',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

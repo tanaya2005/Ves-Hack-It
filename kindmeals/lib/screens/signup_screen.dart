@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -19,8 +21,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController addressController = TextEditingController();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  XFile? _image;
 
-  // Fetch current location
   Future<void> _getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -53,8 +55,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       addressController.text = '${position.latitude}, ${position.longitude}';
     });
   }
-
-  // Open Google Maps with current location
 
   Future<void> _registerWithEmail(BuildContext context) async {
     if (passwordController.text.trim() != confirmPasswordController.text.trim()) {
@@ -119,16 +119,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _image = pickedImage;
+    });
+  }
+
   Widget _buildTextField(TextEditingController controller, String hint,
       {bool isPassword = false, TextInputType keyboardType = TextInputType.text}) {
-    return TextField(
-      controller: controller,
-      obscureText: isPassword,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        hintText: hint,
-        border: const OutlineInputBorder(),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        obscureText: isPassword,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          hintText: hint,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+          filled: true,
+          fillColor: Colors.grey[200],
+        ),
       ),
     );
   }
@@ -142,49 +155,70 @@ class _RegisterScreenState extends State<RegisterScreen> {
           padding: const EdgeInsets.all(24.0),
           child: SingleChildScrollView(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Text('Create Account', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
                 const Text('Register to your account', style: TextStyle(fontSize: 16, color: Colors.black54)),
                 const SizedBox(height: 30),
 
-                _buildTextField(nameController, 'Name'),
-                const SizedBox(height: 15),
-                _buildTextField(emailController, 'Email'),
-                const SizedBox(height: 15),
-                _buildTextField(passwordController, 'Password', isPassword: true),
-                const SizedBox(height: 15),
-                _buildTextField(confirmPasswordController, 'Confirm Password', isPassword: true),
-                const SizedBox(height: 15),
-                _buildTextField(phoneController, 'Phone Number', keyboardType: TextInputType.phone),
-                const SizedBox(height: 15),
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: CircleAvatar(
+                    radius: 55,
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage: _image != null ? FileImage(File(_image!.path)) : null,
+                    child: _image == null
+                        ? const Icon(Icons.camera_alt, size: 50, color: Colors.grey)
+                        : null,
+                  ),
+                ),
+                const SizedBox(height: 20),
 
-                // Address field with location button
-                TextField(
-                  controller: addressController,
-                  decoration: InputDecoration(
-                    hintText: 'Address',
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.location_on),
-                      onPressed: _getCurrentLocation,
+                _buildTextField(nameController, 'Full Name'),
+                _buildTextField(emailController, 'Email Address'),
+                _buildTextField(passwordController, 'Password', isPassword: true),
+                _buildTextField(confirmPasswordController, 'Confirm Password', isPassword: true),
+                _buildTextField(phoneController, 'Phone Number', keyboardType: TextInputType.phone),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: TextField(
+                    controller: addressController,
+                    decoration: InputDecoration(
+                      hintText: 'Address (Tap to Get Current Location)',
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.location_on),
+                        onPressed: _getCurrentLocation,
+                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
                     ),
-                    border: const OutlineInputBorder(),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                 ),
                 const SizedBox(height: 20),
 
                 ElevatedButton(
                   onPressed: () => _registerWithEmail(context),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green, minimumSize: const Size(double.infinity, 50)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    minimumSize: const Size(double.infinity, 50),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
                   child: const Text('Register', style: TextStyle(fontSize: 16)),
                 ),
                 const SizedBox(height: 15),
 
                 ElevatedButton(
                   onPressed: _checkEmailVerification,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, minimumSize: const Size(double.infinity, 50)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    minimumSize: const Size(double.infinity, 50),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
                   child: const Text('Verify Email & Proceed', style: TextStyle(fontSize: 16)),
                 ),
                 const SizedBox(height: 20),
@@ -208,6 +242,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     foregroundColor: Colors.black,
                     minimumSize: const Size(double.infinity, 50),
                     side: const BorderSide(color: Colors.grey),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,

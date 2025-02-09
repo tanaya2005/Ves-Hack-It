@@ -13,7 +13,6 @@ import 'screens/login_screen.dart';
 import 'screens/forgot_password.dart';
 import 'screens/role_selection.dart';
 import 'screens/chat_screen.dart';
-import 'screens/otp_verification.dart';
 import 'screens/dashboard.dart';
 
 void main() async {
@@ -59,7 +58,6 @@ class KindMealsApp extends StatelessWidget {
         '/forgotPassword': (context) => ForgotPasswordScreen(),
         '/roleSelection': (context) => RoleSelectionPage(),
         '/signup': (context) => RegisterScreen(),
-        '/otpVerification': (context) => OTPVerificationScreen(),
         '/dashboard': (context) => Dashboard(),
         '/chatScreen': (context) => ChatScreen(
               recipientName: "Test User",
@@ -71,6 +69,8 @@ class KindMealsApp extends StatelessWidget {
 }
 
 class AuthCheck extends StatefulWidget {
+  const AuthCheck({super.key});
+
   @override
   _AuthCheckState createState() => _AuthCheckState();
 }
@@ -122,6 +122,8 @@ class _AuthCheckState extends State<AuthCheck> {
 
 class LogoutButton extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  LogoutButton({super.key});
 
   @override
   Widget build(BuildContext context) {

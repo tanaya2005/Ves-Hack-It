@@ -270,8 +270,8 @@ class _TrackDeliveryScreenState extends State<TrackDeliveryScreen> {
               children: [
                 CircleAvatar(
                   backgroundColor: Colors.grey[300],
-                  child: const Icon(Icons.person, color: Colors.grey),
                   radius: 20,
+                  child: const Icon(Icons.person, color: Colors.grey),
                 ),
                 const SizedBox(width: 12),
                 const Column(
