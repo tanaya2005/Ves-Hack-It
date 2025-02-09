@@ -1,7 +1,7 @@
-// ignore_for_file: library_private_types_in_public_api, deprecated_member_use
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 import 'package:kindmeals/screens/item_detail_screen.dart';
 
 class LiveDonationRequestsScreen extends StatefulWidget {
@@ -12,54 +12,9 @@ class LiveDonationRequestsScreen extends StatefulWidget {
       _LiveDonationRequestsScreenState();
 }
 
-class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen> {
-  final List<Map<String, String>> _donationRequests = [
-    {
-      'foodName': 'Rice',
-      'quantity': '5 kg',
-      'expirationDate': '10/02/2025 18:00',
-      'image': 'https://www.mississippivegan.com/wp-content/uploads/2021/12/easy-baked-rice-02-1170x1463.jpg',
-      'location': 'Thane, Mumbai, India',
-      'donorName': 'Tanaya Jain',
-      'donorVerification': 'Verified',
-      'latitude': '19.223326',
-      'longitude': '72.976114',
-    },
-    {
-      'foodName': 'Lentils (Dal)',
-      'quantity': '3 kg',
-      'expirationDate': '10/02/2025 19:00',
-      'image': 'https://example.com/lentils.jpg',
-      'location': 'Mumbai, India',
-      'donorName': 'Priya Sharma',
-      'donorVerification': 'Unverified',
-      'latitude': '19.0760',
-      'longitude': '72.8777',
-    },
-    {
-      'foodName': 'Chapati (Flatbread)',
-      'quantity': '20 pieces',
-      'expirationDate': '10/02/2025 20:00',
-      'image': 'https://example.com/chapati.jpg',
-      'location': 'Kolkata, India',
-      'donorName': 'Anil Gupta',
-      'donorVerification': 'Verified',
-      'latitude': '22.5726',
-      'longitude': '88.3639',
-    },
-    {
-      'foodName': 'Curd (Yogurt)',
-      'quantity': '2 liters',
-      'expirationDate': '10/02/2025 21:00',
-      'image': 'https://example.com/curd.jpg',
-      'location': 'Chennai, India',
-      'donorName': 'Ravi Singh',
-      'donorVerification': 'Unverified',
-      'latitude': '13.0827',
-      'longitude': '80.2707',
-    },
-  ];
-
+class _LiveDonationRequestsScreenState
+    extends State<LiveDonationRequestsScreen> {
+  List<Map<String, dynamic>> _donationRequests = [];
   Position? _currentPosition;
   bool _isLoading = true;
   String? _errorMessage;
@@ -67,8 +22,52 @@ class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen>
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();
+    _getCurrentLocation().then((_) {
+      _fetchDonationRequests();
+    });
   }
+
+  Future<void> _fetchDonationRequests() async {
+  try {
+    final response = await http.get(
+      Uri.parse('http://192.168.0.100:3000/api/donations'), // Update with your server's IP
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      setState(() {
+        _donationRequests = data.map((item) {
+          return {
+            'foodName': item['foodName'] ?? 'Unknown Food',
+            'quantity': '${item['quantity'] ?? 0} kg',
+            'expirationDate': item['expirationDate'] ?? 'Unknown',
+            'image': item['imageUrl'] != null
+                ? 'http://192.168.0.100:3000${item['imageUrl']}' // Construct the full image URL
+                : '',
+            'location': item['location'] ?? '',
+            'donorName': item['donorName'] ?? '',
+            'donorVerification': item['donorVerification'] ?? 'Unverified',
+            'latitude': item['latitude']?.toString() ?? '0.0',
+            'longitude': item['longitude']?.toString() ?? '0.0',
+          };
+        }).toList();
+      });
+    } else {
+      setState(() {
+        _errorMessage = 'Failed to load donations: ${response.statusCode}';
+      });
+    }
+  } catch (e) {
+    setState(() {
+      _errorMessage = 'Error fetching donations: $e';
+    });
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
+  }
+}
+
 
   Future<void> _getCurrentLocation() async {
     try {
@@ -96,7 +95,8 @@ class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen>
       if (permission == LocationPermission.deniedForever) {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Location permissions are permanently denied. Please enable them from settings.';
+          _errorMessage =
+              'Location permissions are permanently denied. Please enable them from settings.';
         });
         return;
       }
@@ -131,20 +131,20 @@ class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen>
         return distanceA.compareTo(distanceB);
       });
     }
-    setState(() {
-      _isLoading = false;
-    });
   }
 
-  double _calculateDistance(double startLat, double startLon, double endLat, double endLon) {
+  double _calculateDistance(
+      double startLat, double startLon, double endLat, double endLon) {
     return Geolocator.distanceBetween(startLat, startLon, endLat, endLon);
   }
 
-  void _viewItem(Map<String, String> request) {
+  void _viewItem(Map<String, dynamic> request) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ItemDetailScreen(request: request),
+        builder: (context) => ItemDetailScreen(
+            request:
+                request.map((key, value) => MapEntry(key, value.toString()))),
       ),
     );
   }
@@ -171,6 +171,7 @@ class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen>
                   _errorMessage = null;
                 });
                 _getCurrentLocation();
+                _fetchDonationRequests();
               },
               child: const Text('Retry'),
             ),
@@ -207,6 +208,7 @@ class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen>
                       _errorMessage = null;
                     });
                     await _getCurrentLocation();
+                    await _fetchDonationRequests();
                   },
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -255,7 +257,8 @@ class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen>
                                 ),
                                 const SizedBox(height: 16),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Expanded(
                                       child: Text(
@@ -287,14 +290,16 @@ class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen>
                                 const SizedBox(height: 8),
                                 Text('Quantity: ${request['quantity']}'),
                                 const SizedBox(height: 8),
-                                Text('Expiration Date: ${request['expirationDate']}'),
+                                Text(
+                                    'Expiration Date: ${request['expirationDate']}'),
                                 const SizedBox(height: 16),
                                 Center(
                                   child: ElevatedButton(
                                     onPressed: () => _viewItem(request),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.green,
-                                      minimumSize: const Size(double.infinity, 60),
+                                      minimumSize:
+                                          const Size(double.infinity, 60),
                                     ),
                                     child: const Text(
                                       'View Item',

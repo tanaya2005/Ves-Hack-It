@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -23,14 +25,6 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
   TimeOfDay? _selectedTime;
   bool _isLoading = false;
 
-  final List<String> _foodSuggestions = [
-    'Vegetables',
-    'Fruits',
-    'Grains',
-    'Snacks',
-    'Beverages',
-    'Other',
-  ];
 
   @override
   void dispose() {
@@ -67,92 +61,97 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
   }
 
   Future<void> _submitDonation() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
-        _isLoading = true;
-      });
+  if (_formKey.currentState?.validate() ?? false) {
+    if (_image == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select an image.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
-      try {
-        var dio = Dio();
+    setState(() {
+      _isLoading = true;
+    });
 
-        // Create form data
-        var formData = FormData();
+    try {
+      var dio = Dio();
 
-        // Add text fields
-        formData.fields.addAll([
-          MapEntry('foodName', _foodNameController.text),
-          MapEntry('quantity', _quantityController.text),
-          MapEntry('description', _descriptionController.text),
-          MapEntry('expiryDate', _expiryDateController.text),
-          MapEntry('isVeg', _isVeg.toString()),
-          MapEntry('isNonVeg', _isNonVeg.toString()),
-          // MapEntry('donorName', _donorNameController.text), // Replace with actual donor name
-        ]);
+      // Create form data
+      var formData = FormData();
 
-        // Add image if selected
-        if (_image != null) {
-          formData.files.add(MapEntry(
-            'image',
-            await MultipartFile.fromFile(_image!.path,
-                filename: 'donation_image.jpg'),
-          ));
-        }
+      // Add text fields
+      formData.fields.addAll([
+        MapEntry('foodName', _foodNameController.text),
+        MapEntry('quantity', _quantityController.text),
+        MapEntry('description', _descriptionController.text),
+        MapEntry('expiryDate', _expiryDateController.text),
+        MapEntry('isVeg', _isVeg.toString()),
+        MapEntry('isNonVeg', _isNonVeg.toString()),
+      ]);
 
-        // Send request
-        var response = await dio.post(
-          'http://192.168.0.100:3000/api/donations', // Updated with your IP
-          data: formData,
-          options: Options(
-            headers: {
-              'Accept': 'application/json',
-            },
-          ),
-        );
+      // Add image if selected
+      formData.files.add(MapEntry(
+        'image',
+        await MultipartFile.fromFile(_image!.path, filename: 'donation_image.jpg'),
+      ));
 
-        if (response.statusCode == 201) {
-          if (!mounted) return;
+      // Send request
+      var response = await dio.post(
+        'http://192.168.0.100:3000/api/donations', // Updated with your IP
+        data: formData,
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+          },
+        ),
+      );
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Donation posted successfully!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-
-          // Reset form
-          _formKey.currentState?.reset();
-          setState(() {
-            _image = null;
-            _isVeg = false;
-            _isNonVeg = false;
-            _foodNameController.clear();
-            _quantityController.clear();
-            _descriptionController.clear();
-            _expiryDateController.clear();
-            _selectedTime = null;
-          });
-        } else {
-          if (!mounted) return;
-          throw Exception(
-              'Failed to post donation. Status: ${response.statusCode}');
-        }
-      } catch (e) {
+      if (response.statusCode == 201) {
         if (!mounted) return;
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
+          const SnackBar(
+            content: Text('Donation posted successfully!'),
+            backgroundColor: Colors.green,
           ),
         );
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
+
+        // Reset form
+        _formKey.currentState?.reset();
+        setState(() {
+          _image = null;
+          _isVeg = false;
+          _isNonVeg = false;
+          _foodNameController.clear();
+          _quantityController.clear();
+          _descriptionController.clear();
+          _expiryDateController.clear();
+          _selectedTime = null;
+        });
+      } else {
+        if (!mounted) return;
+        throw Exception('Failed to post donation. Status: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
+}
 
   Future<void> _selectDateAndTime() async {
     DateTime? pickedDate = await showDatePicker(
