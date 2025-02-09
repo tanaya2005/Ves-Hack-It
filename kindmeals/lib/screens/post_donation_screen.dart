@@ -233,7 +233,7 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
                         children: <Widget>[
                           Expanded(
                             child: CheckboxListTile(
-                              title: const Text('Vegetarian'),
+                              title: const Text('Veg'),
                               value: _isVeg,
                               onChanged: _isLoading
                                   ? null
@@ -247,7 +247,7 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
                           ),
                           Expanded(
                             child: CheckboxListTile(
-                              title: const Text('Non-Vegetarian'),
+                              title: const Text('Non-Veg'),
                               value: _isNonVeg,
                               onChanged: _isLoading
                                   ? null
@@ -262,40 +262,21 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      Autocomplete<String>(
-                        optionsBuilder: (TextEditingValue textEditingValue) {
-                          if (textEditingValue.text.isEmpty) {
-                            return const Iterable<String>.empty();
+                      // Replaced Autocomplete with TextFormField
+                      TextFormField(
+                        controller: _foodNameController,
+                        decoration: InputDecoration(
+                          labelText: 'Food Name',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        enabled: !_isLoading,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter the food name';
                           }
-                          return _foodSuggestions.where((food) {
-                            return food
-                                .toLowerCase()
-                                .contains(textEditingValue.text.toLowerCase());
-                          });
-                        },
-                        onSelected: (String selection) {
-                          _foodNameController.text = selection;
-                        },
-                        fieldViewBuilder: (context, controller, focusNode,
-                            onEditingComplete) {
-                          return TextFormField(
-                            controller: controller,
-                            focusNode: focusNode,
-                            onEditingComplete: onEditingComplete,
-                            decoration: InputDecoration(
-                              labelText: 'Food Name',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              enabled: !_isLoading,
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter the food name';
-                              }
-                              return null;
-                            },
-                          );
+                          return null;
                         },
                       ),
                       const SizedBox(height: 16),
@@ -351,39 +332,18 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
                         onTap: _isLoading ? null : _selectDateAndTime,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please select an expiry date and time';
+                            return 'Please enter the expiry date';
                           }
                           return null;
                         },
                       ),
-                      const SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
+                      const SizedBox(height: 24),
+                      Center(
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _submitDonation,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
                           child: _isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text(
-                                  'Submit Donation',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                              ? const CircularProgressIndicator()
+                              : const Text('Post Donation'),
                         ),
                       ),
                     ],
@@ -392,6 +352,10 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
               ),
             ),
           ),
+          if (_isLoading)
+            const Center(
+              child: CircularProgressIndicator(),
+            ),
         ],
       ),
     );
