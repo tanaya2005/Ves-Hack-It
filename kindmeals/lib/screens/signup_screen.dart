@@ -1,8 +1,7 @@
-// ignore_for_file: library_private_types_in_public_api, avoid_print, use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:geolocator/geolocator.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -15,22 +14,85 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  // Fetch current location
+  Future<void> _getCurrentLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Location services are disabled. Please enable them.')),
+      );
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Location permission denied.')),
+        );
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Location permission is permanently denied.')),
+      );
+      return;
+    }
+
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    setState(() {
+      addressController.text = '${position.latitude}, ${position.longitude}';
+    });
+  }
+
+  // Open Google Maps with current location
+
   Future<void> _registerWithEmail(BuildContext context) async {
+    if (passwordController.text.trim() != confirmPasswordController.text.trim()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match!')),
+      );
+      return;
+    }
+
     try {
-      await _auth.createUserWithEmailAndPassword(
+      final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
-      Navigator.pushReplacementNamed(context, '/dashboard');
+
+      User? user = userCredential.user;
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Verification email sent. Please verify your email.')),
+        );
+      }
     } catch (e) {
       print('Email Registration Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    }
+  }
+
+  Future<void> _checkEmailVerification() async {
+    User? user = _auth.currentUser;
+    await user?.reload();
+    if (user != null && user.emailVerified) {
+      Navigator.pushReplacementNamed(context, '/dashboard');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please verify your email to continue.')),
       );
     }
   }
@@ -52,7 +114,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } catch (error) {
       print('Google Sign-In Error: $error');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Google Sign-In Failed')),
+        const SnackBar(content: Text('Google Sign-In Failed')),
       );
     }
   }
@@ -65,7 +127,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hint,
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       ),
     );
   }
@@ -81,67 +144,89 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Create Account', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-                SizedBox(height: 10),
-                Text('Register to your account', style: TextStyle(fontSize: 18, color: Colors.black54)),
-                SizedBox(height: 30),
+                const Text('Create Account', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 10),
+                const Text('Register to your account', style: TextStyle(fontSize: 16, color: Colors.black54)),
+                const SizedBox(height: 30),
 
                 _buildTextField(nameController, 'Name'),
-                SizedBox(height: 20),
+                const SizedBox(height: 15),
                 _buildTextField(emailController, 'Email'),
-                SizedBox(height: 20),
+                const SizedBox(height: 15),
                 _buildTextField(passwordController, 'Password', isPassword: true),
-                SizedBox(height: 20),
+                const SizedBox(height: 15),
+                _buildTextField(confirmPasswordController, 'Confirm Password', isPassword: true),
+                const SizedBox(height: 15),
                 _buildTextField(phoneController, 'Phone Number', keyboardType: TextInputType.phone),
-                SizedBox(height: 20),
-                _buildTextField(addressController, 'Address'),
-                SizedBox(height: 20),
+                const SizedBox(height: 15),
+
+                // Address field with location button
+                TextField(
+                  controller: addressController,
+                  decoration: InputDecoration(
+                    hintText: 'Address',
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.location_on),
+                      onPressed: _getCurrentLocation,
+                    ),
+                    border: const OutlineInputBorder(),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                ),
+                const SizedBox(height: 20),
 
                 ElevatedButton(
                   onPressed: () => _registerWithEmail(context),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green, minimumSize: Size(double.infinity, 50)),
-                  child: Text('Register'),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green, minimumSize: const Size(double.infinity, 50)),
+                  child: const Text('Register', style: TextStyle(fontSize: 16)),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 15),
+
+                ElevatedButton(
+                  onPressed: _checkEmailVerification,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, minimumSize: const Size(double.infinity, 50)),
+                  child: const Text('Verify Email & Proceed', style: TextStyle(fontSize: 16)),
+                ),
+                const SizedBox(height: 20),
 
                 Row(
-                  children: [
+                  children: const [
                     Expanded(child: Divider(thickness: 1)),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: Text('OR', style: TextStyle(color: Colors.black54)),
                     ),
                     Expanded(child: Divider(thickness: 1)),
                   ],
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
 
                 ElevatedButton(
                   onPressed: () => _signInWithGoogle(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: Colors.black,
-                    minimumSize: Size(double.infinity, 50),
-                    side: BorderSide(color: Colors.grey),
+                    minimumSize: const Size(double.infinity, 50),
+                    side: const BorderSide(color: Colors.grey),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image.asset('assets/google_logo.png', height: 24),
-                      SizedBox(width: 10),
-                      Text('Continue with Google'),
+                      const SizedBox(width: 10),
+                      const Text('Continue with Google', style: TextStyle(fontSize: 16)),
                     ],
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Already have an account?'),
+                    const Text('Already have an account?', style: TextStyle(fontSize: 14)),
                     TextButton(
                       onPressed: () => Navigator.pushNamed(context, '/login'),
-                      child: Text('Login'),
+                      child: const Text('Login', style: TextStyle(fontSize: 14)),
                     ),
                   ],
                 ),

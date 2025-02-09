@@ -1,3 +1,6 @@
+// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../widgets/custom_textfield.dart';
 import '../widgets/custom_button.dart';
@@ -6,21 +9,28 @@ class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _ForgotPasswordScreenState createState() => _ForgotPasswordScreenState();
 }
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  void _sendResetEmail() {
+  // Function to send the password reset email
+  Future<void> _sendResetEmail() async {
     if (_formKey.currentState!.validate()) {
-      // TODO: Implement password reset logic
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Password reset link sent to ${emailController.text}")),
-      );
-      Navigator.pop(context); // Go back to login
+      try {
+        await _auth.sendPasswordResetEmail(email: emailController.text);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Password reset link sent to ${emailController.text}")),
+        );
+        Navigator.pop(context); // Go back to login screen
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${e.toString()}")),
+        );
+      }
     }
   }
 

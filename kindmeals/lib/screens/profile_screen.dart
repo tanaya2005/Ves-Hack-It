@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:kindmeals/screens/register_login.dart';
+import 'package:kindmeals/screens/settings_screen.dart';
 import 'edit_profile_screen.dart'; // Import the EditProfileScreen
 import 'change_password_screen.dart'; // Import the ChangePasswordScreen
+import 'login_screen.dart'; // Import LoginScreen
 
 class ProfileScreen extends StatefulWidget {
   final bool isVolunteer;
@@ -35,6 +36,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             onPressed: () {
               // Navigate to Settings Screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
             },
           ),
         ],
@@ -118,8 +123,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     });
                   }
                 }),
-                _buildSettingsTile(
-                    Icons.language, 'Language Preferences', () {}),
+                _buildSettingsTile(Icons.language, 'Language Preferences', () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Select Language'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            ListTile(
+                              title: const Text('English'),
+                              onTap: () {
+                                // Implement language change
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                            ListTile(
+                              title: const Text('Hindi'),
+                              onTap: () {
+                                // Implement language change
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }),
                 _buildSettingsTile(Icons.logout, 'Logout', () {
                   showDialog(
                     context: context,
@@ -154,12 +186,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             onPressed: () {
                               Navigator.of(context).pop(); // Close the dialog
-                              // Navigate to RegisterLoginPage
+                              // Navigate to LoginScreen
                               Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const RegisterLoginPage()));
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => LoginScreen(),
+                                ),
+                              );
                             },
                           ),
                         ],

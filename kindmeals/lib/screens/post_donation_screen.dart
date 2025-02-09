@@ -1,9 +1,8 @@
-// ignore_for_file: library_private_types_in_public_api
-
-import 'dart:io';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class PostDonationScreen extends StatefulWidget {
   const PostDonationScreen({super.key});
@@ -56,11 +55,60 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
     }
   }
 
-  void _submitDonation() {
+  Future<String?> _uploadImage(XFile image) async {
+    try {
+      // Generate a unique file name for the image
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      // Upload image to Firebase Storage
+      UploadTask uploadTask = FirebaseStorage.instance
+          .ref()
+          .child('donations/images/$fileName')
+          .putFile(File(image.path));
+      TaskSnapshot snapshot = await uploadTask;
+      // Get the download URL of the uploaded image
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print("Error uploading image: $e");
+      return null;
+    }
+  }
+
+  void _submitDonation() async {
     if (_formKey.currentState?.validate() ?? false) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Donation posted successfully!')),
-      );
+      String? imageUrl = _image != null ? await _uploadImage(_image!) : null;
+      if (imageUrl != null) {
+        // Create a donation object to send to Firestore
+        Map<String, dynamic> donationData = {
+          'foodName': _foodNameController.text,
+          'quantity': int.parse(_quantityController.text),
+          'description': _descriptionController.text,
+          'expirationDate': _expirationDateController.text,
+          'isVeg': _isVeg,
+          'isNonVeg': _isNonVeg,
+          'imageUrl': imageUrl,
+          'timestamp': FieldValue.serverTimestamp(),
+        };
+
+        // Save donation data to Firestore
+        await FirebaseFirestore.instance.collection('donations').add(donationData);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Donation posted successfully!')),
+        );
+
+        // Reset form after successful submission
+        _formKey.currentState?.reset();
+        setState(() {
+          _image = null;
+          _isVeg = false;
+          _isNonVeg = false;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to upload image')),
+        );
+      }
     }
   }
 
@@ -138,7 +186,7 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Autocomplete<String>(
+                  Autocomplete<String>( // Autocomplete for food suggestions
                     optionsBuilder: (TextEditingValue textEditingValue) {
                       if (textEditingValue.text.isEmpty) {
                         return const Iterable<String>.empty();

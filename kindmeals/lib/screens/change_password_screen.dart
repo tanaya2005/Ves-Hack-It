@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'forgot_password.dart'; // Correct import for ForgotPasswordScreen
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key, required String currentPassword});
@@ -58,9 +59,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  setState(() {
-                    forgotPassword = true;
-                  });
+                  // Navigate to Forgot Password Screen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ForgotPasswordScreen()),
+                  );
                 },
                 child: const Text('Forgot Password?'),
               ),
