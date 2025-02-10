@@ -32,6 +32,19 @@ class Dashboard extends StatelessWidget {
       appBar: AppBar(
         title: const Text('KindMeals Dashboard'),
         backgroundColor: Colors.green,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const NotificationScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -74,26 +87,73 @@ class Dashboard extends StatelessWidget {
         backgroundColor: Colors.green,
         child: const Icon(Icons.chat),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        type: BottomNavigationBarType.fixed,
-        onTap: (index) {
-          if (index == 3) {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
-          }
-          else if (index == 1) {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationScreen()));
-          }
-          else if (index == 2) {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const DonationHistoryScreen()));
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notifications'),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Profile'),
-        ],
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.green,
+              ),
+              child: Text(
+                'KindMeals',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.account_circle),
+              title: const Text('Profile'),
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: const Text('History'),
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const DonationHistoryScreen()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.support),
+              title: const Text('Support'),
+              onTap: () {
+                // Implement Support screen navigation
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.help),
+              title: const Text('FAQs'),
+              onTap: () {
+                // Implement FAQs screen navigation
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.privacy_tip),
+              title: const Text('Privacy Policy'),
+              onTap: () {
+                // Implement Privacy Policy screen navigation
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.article),
+              title: const Text('Terms and Conditions'),
+              onTap: () {
+                // Implement Terms and Conditions screen navigation
+              },
+            ),
+            const Divider(),
+            ListTile(
+              title: const Text('KindMeals © 2025'),
+              onTap: () {
+                // Optionally handle the copyright action
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -151,8 +211,7 @@ class RecentChatsScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  // ignore: avoid_types_as_parameter_names, non_constant_identifier_names
-                  builder: (context) => ChatScreen(recipientName: chat.recipientName, onMessageSent: (String ) {  },),
+                  builder: (context) => ChatScreen(recipientName: chat.recipientName, onMessageSent: (String message) { }),
                 ),
               );
             },

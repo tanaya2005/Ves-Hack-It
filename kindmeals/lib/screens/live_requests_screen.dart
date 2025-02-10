@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, library_private_types_in_public_api
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -35,12 +37,14 @@ class _LiveDonationRequestsScreenState
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
+      print('API Response: $data'); // Log the API response
       setState(() {
         _donationRequests = data.map((item) {
           return {
             'foodName': item['foodName'] ?? 'Unknown Food',
-            'quantity': '${item['quantity'] ?? 0} kg',
-            'expirationDate': item['expirationDate'] ?? 'Unknown',
+            'quantity': '${item['quantity'] ?? 0} ',
+            'expiryDate': item['expiryDate'] ?? 'Unknown',
+            'description': item['description'] ?? 'No description provided',
             'image': item['imageUrl'] != null
                 ? 'http://192.168.0.100:3000${item['imageUrl']}' // Construct the full image URL
                 : '',
@@ -67,7 +71,6 @@ class _LiveDonationRequestsScreenState
     });
   }
 }
-
 
   Future<void> _getCurrentLocation() async {
     try {
@@ -290,8 +293,11 @@ class _LiveDonationRequestsScreenState
                                 const SizedBox(height: 8),
                                 Text('Quantity: ${request['quantity']}'),
                                 const SizedBox(height: 8),
-                                Text(
-                                    'Expiration Date: ${request['expirationDate']}'),
+                                Text('Expiry Date: ${request['expiryDate']}'),
+                                const SizedBox(height: 8),
+                                Text('Location: ${request['location']}'),
+                                const SizedBox(height: 8),
+                                Text('Donor: ${request['donorName']}'),
                                 const SizedBox(height: 16),
                                 Center(
                                   child: ElevatedButton(
@@ -318,4 +324,3 @@ class _LiveDonationRequestsScreenState
     );
   }
 }
- 

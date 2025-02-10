@@ -149,21 +149,15 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                     const SizedBox(height: 8),
                     _buildInfoRow(Icons.scale, 'Quantity',
                         widget.request['quantity'] ?? 'N/A'),
-                    _buildInfoRow(Icons.access_time, 'Expiration Date',
-                        widget.request['expirationDate'] ?? 'N/A'),
+                    _buildInfoRow(Icons.access_time, 'Expiry Date',
+                        widget.request['expiryDate'] ?? 'N/A'),
                     _buildInfoRow(Icons.description, 'Description',
                         widget.request['description'] ?? 'N/A'),
                     _buildInfoRow(Icons.location_on, 'Location',
                         widget.request['location'] ?? 'N/A'),
                     _buildInfoRow(Icons.person, 'Donor Name',
                         widget.request['donorName'] ?? 'N/A'),
-                    _buildInfoRow(
-                        widget.request['donorVerification'] == 'Verified'
-                            ? Icons.verified
-                            : Icons.verified_outlined,
-                        'Verification Status',
-                        widget.request['donorVerification'] ?? 'N/A'),
-                  ],
+                  ]
                 ),
               ),
             ),

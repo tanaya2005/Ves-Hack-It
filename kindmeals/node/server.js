@@ -34,7 +34,7 @@ const donationSchema = new mongoose.Schema({
   foodName: String,
   quantity: Number,
   description: String,
-  expirationDate: String,
+  expiryDate: String, // Ensure this is included
   isVeg: Boolean,
   isNonVeg: Boolean,
   imageUrl: String,
@@ -56,7 +56,7 @@ app.post('/api/donations', upload.single('image'), async (req, res) => {
       foodName: req.body.foodName,
       quantity: parseInt(req.body.quantity),
       description: req.body.description,
-      expirationDate: req.body.expirationDate,
+      expiryDate: req.body.expiryDate, // Ensure this is included
       isVeg: req.body.isVeg === 'true',
       isNonVeg: req.body.isNonVeg === 'true',
       imageUrl: req.file ? `/uploads/${req.file.filename}` : null

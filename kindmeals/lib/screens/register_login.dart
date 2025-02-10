@@ -12,7 +12,7 @@ class RegisterLoginPage extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/signup'); // Ensure this is correct
+                Navigator.pushNamed(context, '/register'); // Ensure this is correct
               },
               child: Text('Register'),
             ),

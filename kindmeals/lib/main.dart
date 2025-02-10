@@ -1,4 +1,6 @@
 import 'package:kindmeals/screens/language_selection.dart';
+import 'package:kindmeals/screens/register_screen.dart';
+import 'package:kindmeals/screens/volunteer_screen.dart';
 
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +10,6 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'theme.dart';
 import 'screens/welcome_splash.dart';
 import 'screens/register_login.dart';
-import 'screens/signup_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/forgot_password.dart';
 import 'screens/role_selection.dart';
@@ -56,13 +57,14 @@ class KindMealsApp extends StatelessWidget {
         '/registerLogin': (context) => RegisterLoginPage(),
         '/login': (context) => LoginScreen(),
         '/forgotPassword': (context) => ForgotPasswordScreen(),
-        '/roleSelection': (context) => RoleSelectionPage(),
-        '/signup': (context) => RegisterScreen(),
+        '/roleSelection': (context) => RoleSelection(),
+        '/register': (context) => RegisterScreen(),
         '/dashboard': (context) => Dashboard(),
         '/chatScreen': (context) => ChatScreen(
               recipientName: "Test User",
               onMessageSent: (String message) {},
             ),
+        '/volunteer_dashboard': (context) => VolunteerScreen(),
       },
     );
   }

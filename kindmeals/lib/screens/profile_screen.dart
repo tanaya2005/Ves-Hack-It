@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:kindmeals/screens/role_selection.dart';
 import 'package:kindmeals/screens/settings_screen.dart';
 import 'edit_profile_screen.dart'; // Import the EditProfileScreen
 import 'change_password_screen.dart'; // Import the ChangePasswordScreen
-import 'login_screen.dart'; // Import LoginScreen
+// import 'login_screen.dart'; // Import LoginScreen
 
 class ProfileScreen extends StatefulWidget {
   final bool isVolunteer;
@@ -190,7 +191,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => LoginScreen(),
+                                  builder: (context) => RoleSelection(),
                                 ),
                               );
                             },
