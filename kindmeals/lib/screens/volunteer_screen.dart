@@ -7,7 +7,8 @@ class VolunteerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Volunteer'), backgroundColor: Colors.green),
+      appBar:
+          AppBar(title: const Text('Volunteer'), backgroundColor: Colors.green),
       body: const Center(child: Text('Volunteer for a cause.')),
     );
   }

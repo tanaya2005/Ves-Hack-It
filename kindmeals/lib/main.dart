@@ -1,6 +1,16 @@
+import 'package:kindmeals/screens/bank_account_details.dart';
+import 'package:kindmeals/screens/driving_license_details.dart';
+import 'package:kindmeals/screens/emergency_details.dart';
 import 'package:kindmeals/screens/language_selection.dart';
+import 'package:kindmeals/screens/pan_card_details.dart';
 import 'package:kindmeals/screens/register_screen.dart';
+import 'package:kindmeals/screens/vehicle_details.dart';
+import 'package:kindmeals/screens/volunteer_login_page.dart';
 import 'package:kindmeals/screens/volunteer_screen.dart';
+import 'screens/volunteer_document_dashboard.dart';
+import 'screens/personal_documents_upload.dart';
+import 'screens/aadhar_upload.dart';
+import 'screens/registration_status.dart';
 
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -65,6 +75,17 @@ class KindMealsApp extends StatelessWidget {
               onMessageSent: (String message) {},
             ),
         '/volunteer_dashboard': (context) => VolunteerScreen(),
+        '/volunteer_document_dashboard': (context) =>
+            VolunteerDocumentDashboard(),
+        '/volunteerLogin': (context) => VolunteerLoginPage(),
+        '/personalDocuments': (context) => const PersonalDocumentsUpload(),
+        '/aadharUpload': (context) => AadharUploadPage(),
+        '/registrationStatus': (context) => const RegistrationStatus(),
+        '/vehicleDetails': (context) => const VehicleDetailsPage(),
+        '/panCardDetails': (context) => const PanCardDetailsPage(),
+        '/drivingLicenseDetails': (context) => const DrivingLicensePage(),
+        '/bankAccountDetails': (context) => const BankAccountDetailsPage(),
+        '/emergencyDetails': (context) => const EmergencyDetailsPage(),
       },
     );
   }
