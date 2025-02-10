@@ -1,5 +1,8 @@
+// ignore_for_file: avoid_print
+
 import 'package:kindmeals/screens/language_selection.dart';
 import 'package:kindmeals/screens/register_screen.dart';
+import 'package:kindmeals/screens/role_selection.dart';
 import 'package:kindmeals/screens/volunteer_screen.dart';
 
 import 'firebase_options.dart';
@@ -9,10 +12,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'theme.dart';
 import 'screens/welcome_splash.dart';
-import 'screens/register_login.dart';
+// import 'screens/register_login.dart';
 import 'screens/login_screen.dart';
 import 'screens/forgot_password.dart';
-import 'screens/role_selection.dart';
 import 'screens/chat_screen.dart';
 import 'screens/dashboard.dart';
 
@@ -54,10 +56,10 @@ class KindMealsApp extends StatelessWidget {
           LanguageSelectionPage(), // Start with your existing LanguageSelectionScreen
       routes: {
         '/welcome': (context) => WelcomeSplashScreen(),
-        '/registerLogin': (context) => RegisterLoginPage(),
+        '/roleSelection': (context) => RoleSelection(),
+        // '/register_login': (context) => RegisterLoginPage(),
         '/login': (context) => LoginScreen(),
         '/forgotPassword': (context) => ForgotPasswordScreen(),
-        '/roleSelection': (context) => RoleSelection(),
         '/register': (context) => RegisterScreen(),
         '/dashboard': (context) => Dashboard(),
         '/chatScreen': (context) => ChatScreen(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'register_login.dart';
+import 'package:kindmeals/screens/login_screen.dart';
+// import 'register_login.dart';
 import 'volunteer_signup.dart';
 
 class RoleSelection extends StatelessWidget {
@@ -18,7 +19,7 @@ class RoleSelection extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => RegisterLoginPage()),
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
                 );
               },
               child: Text('I am a User'),

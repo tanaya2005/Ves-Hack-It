@@ -1,6 +1,5 @@
-// ignore_for_file: library_private_types_in_public_api
-
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:dio/dio.dart';
@@ -15,16 +14,15 @@ class PostDonationScreen extends StatefulWidget {
 class _PostDonationScreenState extends State<PostDonationScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _quantityController = TextEditingController();
-  final TextEditingController _expiryDateController =
-      TextEditingController();
+  final TextEditingController _expiryDateController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _foodNameController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
   XFile? _image;
   bool _isVeg = false;
   bool _isNonVeg = false;
   TimeOfDay? _selectedTime;
   bool _isLoading = false;
-
 
   @override
   void dispose() {
@@ -32,6 +30,7 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
     _expiryDateController.dispose();
     _descriptionController.dispose();
     _foodNameController.dispose();
+    _locationController.dispose();
     super.dispose();
   }
 
@@ -61,97 +60,108 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
   }
 
   Future<void> _submitDonation() async {
-  if (_formKey.currentState?.validate() ?? false) {
-    if (_image == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select an image.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      var dio = Dio();
-
-      // Create form data
-      var formData = FormData();
-
-      // Add text fields
-      formData.fields.addAll([
-        MapEntry('foodName', _foodNameController.text),
-        MapEntry('quantity', _quantityController.text),
-        MapEntry('description', _descriptionController.text),
-        MapEntry('expiryDate', _expiryDateController.text),
-        MapEntry('isVeg', _isVeg.toString()),
-        MapEntry('isNonVeg', _isNonVeg.toString()),
-      ]);
-
-      // Add image if selected
-      formData.files.add(MapEntry(
-        'image',
-        await MultipartFile.fromFile(_image!.path, filename: 'donation_image.jpg'),
-      ));
-
-      // Send request
-      var response = await dio.post(
-        'http://192.168.0.100:3000/api/donations', // Updated with your IP
-        data: formData,
-        options: Options(
-          headers: {
-            'Accept': 'application/json',
-          },
-        ),
-      );
-
-      if (response.statusCode == 201) {
-        if (!mounted) return;
-
+    if (_formKey.currentState?.validate() ?? false) {
+      if (_image == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Donation posted successfully!'),
-            backgroundColor: Colors.green,
+            content: Text('Please select an image.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        var dio = Dio();
+
+        // Create form data
+        var formData = FormData();
+
+        // Add text fields
+        formData.fields.addAll([
+          MapEntry('foodName', _foodNameController.text),
+          MapEntry('quantity', _quantityController.text),
+          MapEntry('description', _descriptionController.text),
+          MapEntry('expiryDate', _expiryDateController.text),
+          MapEntry('isVeg', _isVeg.toString()),
+          MapEntry('isNonVeg', _isNonVeg.toString()),
+          MapEntry('location', _locationController.text), // Use lowercase 'location'
+        ]);
+
+        // Add image if selected
+        formData.files.add(MapEntry(
+          'image',
+          await MultipartFile.fromFile(_image!.path, filename: 'donation_image.jpg'),
+        ));
+
+        // Add latitude and longitude if available
+        Position? position = await _getCurrentLocation();
+        if (position != null) {
+          formData.fields.addAll([
+            MapEntry('latitude', position.latitude.toString()),
+            MapEntry('longitude', position.longitude.toString()),
+          ]);
+        }
+
+        // Send request
+        var response = await dio.post(
+          'http://192.168.0.100:3000/api/donations', // Update with your IP
+          data: formData,
+          options: Options(
+            headers: {
+              'Accept': 'application/json',
+            },
           ),
         );
 
-        // Reset form
-        _formKey.currentState?.reset();
-        setState(() {
-          _image = null;
-          _isVeg = false;
-          _isNonVeg = false;
-          _foodNameController.clear();
-          _quantityController.clear();
-          _descriptionController.clear();
-          _expiryDateController.clear();
-          _selectedTime = null;
-        });
-      } else {
+        if (response.statusCode == 201) {
+          if (!mounted) return;
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Donation posted successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          // Reset form
+          _formKey.currentState?.reset();
+          setState(() {
+            _image = null;
+            _isVeg = false;
+            _isNonVeg = false;
+            _foodNameController.clear();
+            _quantityController.clear();
+            _descriptionController.clear();
+            _expiryDateController.clear();
+            _locationController.clear();
+            _selectedTime = null;
+          });
+        } else {
+          if (!mounted) return;
+          throw Exception('Failed to post donation. Status: ${response.statusCode}');
+        }
+      } catch (e) {
         if (!mounted) return;
-        throw Exception('Failed to post donation. Status: ${response.statusCode}');
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
-}
 
   Future<void> _selectDateAndTime() async {
     DateTime? pickedDate = await showDatePicker(
@@ -168,6 +178,58 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
               '${pickedDate.day}/${pickedDate.month}/${pickedDate.year} ${_selectedTime!.format(context)}';
         });
       }
+    }
+  }
+
+  Future<Position?> _getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Check if location services are enabled
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return null;
+    }
+
+    // Check location permissions
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return null;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return null;
+    }
+
+    // Get the current location
+    return await Geolocator.getCurrentPosition();
+  }
+
+  Future<void> _fetchLocation() async {
+    try {
+      Position? position = await _getCurrentLocation();
+      if (position != null) {
+        setState(() {
+          _locationController.text = 'Lat: ${position.latitude}, Long: ${position.longitude}';
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Unable to fetch location. Please enable location services and grant permissions.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error fetching location: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -261,7 +323,6 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      // Replaced Autocomplete with TextFormField
                       TextFormField(
                         controller: _foodNameController,
                         decoration: InputDecoration(
@@ -335,6 +396,29 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
                           }
                           return null;
                         },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _locationController,
+                        decoration: InputDecoration(
+                          labelText: 'Location',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        enabled: !_isLoading,
+                        readOnly: true,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please fetch your location';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _isLoading ? null : _fetchLocation,
+                        child: const Text('Fetch Location'),
                       ),
                       const SizedBox(height: 24),
                       Center(

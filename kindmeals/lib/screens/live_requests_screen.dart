@@ -51,19 +51,20 @@ class _LiveDonationRequestsScreenState
             'location': item['location'] ?? '',
             'donorName': item['donorName'] ?? '',
             'donorVerification': item['donorVerification'] ?? 'Unverified',
-            'latitude': item['latitude']?.toString() ?? '0.0',
-            'longitude': item['longitude']?.toString() ?? '0.0',
+            'latitude': item['latitude']?.toString() ?? '0.0', // Ensure latitude is included
+            'longitude': item['longitude']?.toString() ?? '0.0', // Ensure longitude is included
           };
         }).toList();
       });
     } else {
       setState(() {
-        _errorMessage = 'Failed to load donations: ${response.statusCode}';
+        _errorMessage = 'Failed to load donations: ${response.statusCode} - ${response.body}';
       });
     }
-  } catch (e) {
+  } catch (e, stackTrace) {
+    print('Error fetching donations: $e\n$stackTrace'); // Log the error and stack trace
     setState(() {
-      _errorMessage = 'Error fetching donations: $e';
+      _errorMessage = 'Error fetching donations: ${e.toString()}';
     });
   } finally {
     setState(() {
@@ -73,48 +74,49 @@ class _LiveDonationRequestsScreenState
 }
 
   Future<void> _getCurrentLocation() async {
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = 'Location services are disabled. Please enable them.';
-        });
-        return;
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          setState(() {
-            _isLoading = false;
-            _errorMessage = 'Location permissions are denied.';
-          });
-          return;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        setState(() {
-          _isLoading = false;
-          _errorMessage =
-              'Location permissions are permanently denied. Please enable them from settings.';
-        });
-        return;
-      }
-
-      _currentPosition = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-      _sortByDistance();
-    } catch (e) {
+  try {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Error getting location: $e';
+        _errorMessage = 'Location services are disabled. Please enable them.';
       });
+      return;
     }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Location permissions are denied.';
+        });
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Location permissions are permanently denied. Please enable them from settings.';
+      });
+      return;
+    }
+
+    _currentPosition = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+    print('Current Position: ${_currentPosition?.latitude}, ${_currentPosition?.longitude}'); // Log the coordinates
+    _sortByDistance();
+  } catch (e, stackTrace) {
+    print('Error getting location: $e\n$stackTrace'); // Log the error and stack trace
+    setState(() {
+      _isLoading = false;
+      _errorMessage = 'Error getting location: ${e.toString()}';
+    });
   }
+}
 
   void _sortByDistance() {
     if (_currentPosition != null) {
@@ -122,14 +124,14 @@ class _LiveDonationRequestsScreenState
         double distanceA = _calculateDistance(
           _currentPosition!.latitude,
           _currentPosition!.longitude,
-          double.parse(a['latitude']!),
-          double.parse(a['longitude']!),
+          double.tryParse(a['latitude'] ?? '0.0') ?? 0.0,
+          double.tryParse(a['longitude'] ?? '0.0') ?? 0.0,
         );
         double distanceB = _calculateDistance(
           _currentPosition!.latitude,
           _currentPosition!.longitude,
-          double.parse(b['latitude']!),
-          double.parse(b['longitude']!),
+          double.tryParse(b['latitude'] ?? '0.0') ?? 0.0,
+          double.tryParse(b['longitude'] ?? '0.0') ?? 0.0,
         );
         return distanceA.compareTo(distanceB);
       });
@@ -151,6 +153,7 @@ class _LiveDonationRequestsScreenState
       ),
     );
   }
+  
 
   Widget _buildErrorWidget() {
     return Center(
@@ -167,7 +170,7 @@ class _LiveDonationRequestsScreenState
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
+            ElevatedButton.icon(
               onPressed: () {
                 setState(() {
                   _isLoading = true;
@@ -176,7 +179,13 @@ class _LiveDonationRequestsScreenState
                 _getCurrentLocation();
                 _fetchDonationRequests();
               },
-              child: const Text('Retry'),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
             ),
           ],
         ),
@@ -222,16 +231,25 @@ class _LiveDonationRequestsScreenState
                             ? _calculateDistance(
                                 _currentPosition!.latitude,
                                 _currentPosition!.longitude,
-                                double.parse(request['latitude']!),
-                                double.parse(request['longitude']!),
+                                double.tryParse(request['latitude'] ?? '0.0') ??
+                                    0.0,
+                                double.tryParse(
+                                        request['longitude'] ?? '0.0') ??
+                                    0.0,
                               )
                             : 0.0;
+
+                        if (distance == 0.0) {
+                          print(
+                              'Invalid coordinates for donation: ${request['foodName']}');
+                        }
 
                         return Card(
                           elevation: 5,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),
+                          margin: const EdgeInsets.only(bottom: 16),
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: Column(

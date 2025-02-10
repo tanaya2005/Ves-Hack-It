@@ -25,6 +25,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   XFile? _image;
 
+  // Variable to store the selected role ('donor', 'recipient', or 'volunteer')
+  String? selectedRole;
+
   Future<void> _getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -150,125 +153,166 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
-        child: Padding(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.all(24.0),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text('Create Account', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 10),
-                const Text('Register to your account', style: TextStyle(fontSize: 16, color: Colors.black54)),
-                const SizedBox(height: 30),
-
-                GestureDetector(
-                  onTap: _pickImage,
-                  child: CircleAvatar(
-                    radius: 55,
-                    backgroundColor: Colors.grey[300],
-                    backgroundImage: _image != null ? FileImage(File(_image!.path)) : null,
-                    child: _image == null
-                        ? const Icon(Icons.camera_alt, size: 50, color: Colors.grey)
-                        : null,
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: screenSize.height * 0.02),
+              const Text(
+                'Create Account',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'Register to your account',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
+              SizedBox(height: screenSize.height * 0.03),
+              GestureDetector(
+                onTap: _pickImage,
+                child: CircleAvatar(
+                  radius: 55,
+                  backgroundColor: Colors.grey[300],
+                  backgroundImage: _image != null ? FileImage(File(_image!.path)) : null,
+                  child: _image == null
+                      ? const Icon(Icons.camera_alt, size: 50, color: Colors.grey)
+                      : null,
                 ),
-                const SizedBox(height: 20),
-
-                _buildTextField(nameController, 'Full Name'),
-                _buildTextField(emailController, 'Email Address'),
-                _buildTextField(passwordController, 'Password', isPassword: true),
-                _buildTextField(confirmPasswordController, 'Confirm Password', isPassword: true),
-                _buildTextField(phoneController, 'Phone Number', keyboardType: TextInputType.phone),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: TextField(
-                    controller: addressController,
-                    decoration: InputDecoration(
-                      hintText: 'Address (Tap to Get Current Location)',
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.location_on),
-                        onPressed: _getCurrentLocation,
-                      ),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      filled: true,
-                      fillColor: Colors.grey[200],
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+              ),
+              SizedBox(height: screenSize.height * 0.03),
+              _buildTextField(nameController, 'Full Name'),
+              _buildTextField(emailController, 'Email Address'),
+              _buildTextField(passwordController, 'Password', isPassword: true),
+              _buildTextField(confirmPasswordController, 'Confirm Password', isPassword: true),
+              _buildTextField(phoneController, 'Phone Number', keyboardType: TextInputType.phone),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: TextField(
+                  controller: addressController,
+                  decoration: InputDecoration(
+                    hintText: 'Address (Tap to Get Current Location)',
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.location_on),
+                      onPressed: _getCurrentLocation,
                     ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
                   ),
                 ),
-                const SizedBox(height: 20),
-
-                ElevatedButton(
-                  onPressed: () => _registerWithEmail(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: const Text('Register', style: TextStyle(fontSize: 16)),
-                ),
-                const SizedBox(height: 15),
-
-                ElevatedButton(
-                  onPressed: _checkEmailVerification,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: const Text('Verify Email & Proceed', style: TextStyle(fontSize: 16)),
-                ),
-                const SizedBox(height: 20),
-
-                Row(
-                  children: const [
-                    Expanded(child: Divider(thickness: 1)),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text('OR', style: TextStyle(color: Colors.black54)),
-                    ),
-                    Expanded(child: Divider(thickness: 1)),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                ElevatedButton(
-                  onPressed: () => _signInWithGoogle(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    minimumSize: const Size(double.infinity, 50),
-                    side: const BorderSide(color: Colors.grey),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+              ),
+              SizedBox(height: screenSize.height * 0.02),
+              // Using Wrap for responsive role selection
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 20,
+                runSpacing: 10,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Image.asset('assets/google_logo.png', height: 24),
-                      const SizedBox(width: 10),
-                      const Text('Continue with Google', style: TextStyle(fontSize: 16)),
+                      Radio<String>(
+                        value: 'donor',
+                        groupValue: selectedRole,
+                        onChanged: (String? value) {
+                          setState(() {
+                            selectedRole = value;
+                          });
+                        },
+                      ),
+                      const Text('Donor'),
                     ],
                   ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Radio<String>(
+                        value: 'recipient',
+                        groupValue: selectedRole,
+                        onChanged: (String? value) {
+                          setState(() {
+                            selectedRole = value;
+                          });
+                        },
+                      ),
+                      const Text('Recipient'),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: screenSize.height * 0.02),
+              ElevatedButton(
+                onPressed: () => _registerWithEmail(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                const SizedBox(height: 10),
-
-                Row(
+                child: const Text('Register', style: TextStyle(fontSize: 16)),
+              ),
+              const SizedBox(height: 15),
+              ElevatedButton(
+                onPressed: _checkEmailVerification,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('Verify Email & Proceed', style: TextStyle(fontSize: 16)),
+              ),
+              SizedBox(height: screenSize.height * 0.02),
+              Row(
+                children: const [
+                  Expanded(child: Divider(thickness: 1)),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text('OR', style: TextStyle(color: Colors.black54)),
+                  ),
+                  Expanded(child: Divider(thickness: 1)),
+                ],
+              ),
+              SizedBox(height: screenSize.height * 0.02),
+              ElevatedButton(
+                onPressed: () => _signInWithGoogle(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  minimumSize: const Size(double.infinity, 50),
+                  side: const BorderSide(color: Colors.grey),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text('Already have an account?', style: TextStyle(fontSize: 14)),
-                    TextButton(
-                      onPressed: () => Navigator.pushNamed(context, '/login'),
-                      child: const Text('Login', style: TextStyle(fontSize: 14)),
-                    ),
+                    Image.asset('assets/google_logo.png', height: 24),
+                    const SizedBox(width: 10),
+                    const Text('Continue with Google', style: TextStyle(fontSize: 16)),
                   ],
                 ),
-              ],
-            ),
+              ),
+              SizedBox(height: screenSize.height * 0.02),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Already have an account?', style: TextStyle(fontSize: 14)),
+                  TextButton(
+                    onPressed: () => Navigator.pushNamed(context, '/login'),
+                    child: const Text('Login', style: TextStyle(fontSize: 14)),
+                  ),
+                ],
+              ),
+              SizedBox(height: screenSize.height * 0.02),
+            ],
           ),
         ),
       ),
