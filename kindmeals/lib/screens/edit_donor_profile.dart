@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-class EditProfileScreen extends StatefulWidget {
+class EditDonorProfileScreen extends StatefulWidget {
   final String name;
   final String email;
   final String phone;
@@ -11,7 +11,7 @@ class EditProfileScreen extends StatefulWidget {
   final String about;
   final String profileImageUrl;
 
-  const EditProfileScreen({
+  const EditDonorProfileScreen({
     super.key,
     required this.name,
     required this.email,
@@ -23,10 +23,10 @@ class EditProfileScreen extends StatefulWidget {
   });
 
   @override
-  State<EditProfileScreen> createState() => _EditProfileScreenState();
+  State<EditDonorProfileScreen> createState() => _EditDonorProfileScreenState();
 }
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
+class _EditDonorProfileScreenState extends State<EditDonorProfileScreen> {
   late TextEditingController nameController;
   late TextEditingController emailController;
   late TextEditingController phoneController;

@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kindmeals/screens/api_service.dart';
+import 'user_role.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -21,18 +23,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController confirmPasswordController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
+  // New controllers for role-specific fields
+  final TextEditingController organizationController = TextEditingController();
+  final TextEditingController aboutController = TextEditingController();
+  final TextEditingController recipientIdController = TextEditingController();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   XFile? _image;
+  String? selectedRole; // Variable to store the selected role ('donor', 'recipient')
 
-  // Variable to store the selected role ('donor', 'recipient', or 'volunteer')
-  String? selectedRole;
-
+  // To handle the current location fetching
   Future<void> _getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Location services are disabled. Please enable them.')),
+        const SnackBar(
+            content:
+                Text('Location services are disabled. Please enable them.')),
       );
       return;
     }
@@ -50,18 +57,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (permission == LocationPermission.deniedForever) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Location permission is permanently denied.')),
+        const SnackBar(
+            content: Text('Location permission is permanently denied.')),
       );
       return;
     }
 
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
     setState(() {
       addressController.text = '${position.latitude}, ${position.longitude}';
     });
   }
 
+  // Register using email and password
   Future<void> _registerWithEmail(BuildContext context) async {
+    if (selectedRole == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a role (Donor, Recipient)')),
+      );
+      return;
+    }
+
     if (passwordController.text.trim() != confirmPasswordController.text.trim()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Passwords do not match!')),
@@ -76,20 +93,45 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       User? user = userCredential.user;
-      if (user != null && !user.emailVerified) {
-        await user.sendEmailVerification();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Verification email sent. Please verify your email.')),
-        );
+      if (user != null) {
+        // Prepare user data for MongoDB with role-specific fields
+        final userData = {
+          'name': nameController.text.trim(),
+          'email': emailController.text.trim(),
+          'phone': phoneController.text.trim(),
+          'location': addressController.text.trim(),
+          'currentPassword': passwordController.text.trim(),
+          // Include role-specific fields based on selection
+          if (selectedRole == 'donor') 'organization': organizationController.text.trim(),
+          if (selectedRole == 'recipient') ...{
+            'recipientId': recipientIdController.text.trim(),
+            'about': aboutController.text.trim(),
+          },
+        };
+
+        try {
+          final response = await ApiService.registerUser(userData, selectedRole!);
+          print('MongoDB Registration successful: ${response['message']}');
+
+          if (!user.emailVerified) {
+            await user.sendEmailVerification();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Verification email sent. Please verify your email.')),
+            );
+          }
+        } catch (mongoError) {
+          await user.delete();
+          throw Exception('Failed to save user data: $mongoError');
+        }
       }
     } catch (e) {
-      print('Email Registration Error: $e');
+      print('Registration Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
       );
     }
   }
-
+  // Check if email is verified
   Future<void> _checkEmailVerification() async {
     User? user = _auth.currentUser;
     await user?.reload();
@@ -102,13 +144,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  // Google Sign-In
   Future<void> _signInWithGoogle(BuildContext context) async {
-    final GoogleSignIn googleSignIn = GoogleSignIn(signInOption: SignInOption.standard);
+    if (selectedRole == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content:
+                Text('Please select a role (Donor, Recipient, Volunteer)')),
+      );
+      return;
+    }
+
+    final GoogleSignIn googleSignIn =
+        GoogleSignIn(signInOption: SignInOption.standard);
     try {
       await googleSignIn.signOut();
       final GoogleSignInAccount? account = await googleSignIn.signIn();
       if (account != null) {
-        final GoogleSignInAuthentication googleAuth = await account.authentication;
+        final GoogleSignInAuthentication googleAuth =
+            await account.authentication;
         final credential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
@@ -124,23 +178,61 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  // Pick Image from Gallery
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedImage =
+        await picker.pickImage(source: ImageSource.gallery);
     setState(() {
       _image = pickedImage;
     });
   }
+  Widget _buildRoleSpecificFields() {
+    if (selectedRole == 'donor') {
+      return _buildTextField(
+        organizationController,
+        'Organization Name',
+        hint: 'Enter your organization name',
+      );
+    } else if (selectedRole == 'recipient') {
+      return Column(
+        children: [
+          _buildTextField(
+            recipientIdController,
+            'Recipient ID',
+            hint: 'Enter your recipient ID',
+          ),
+          _buildTextField(
+            aboutController,
+            'About',
+            hint: 'Tell us about yourself',
+            maxLines: 3,
+          ),
+        ],
+      );
+    }
+    return const SizedBox.shrink();
+  }
 
-  Widget _buildTextField(TextEditingController controller, String hint,
-      {bool isPassword = false, TextInputType keyboardType = TextInputType.text}) {
+  
+  // Build TextField widget
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label, {
+    bool isPassword = false,
+    TextInputType keyboardType = TextInputType.text,
+    String? hint,
+    int? maxLines,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextField(
         controller: controller,
         obscureText: isPassword,
         keyboardType: keyboardType,
+        maxLines: maxLines ?? 1,
         decoration: InputDecoration(
+          labelText: label,
           hintText: hint,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
@@ -182,9 +274,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: CircleAvatar(
                   radius: 55,
                   backgroundColor: Colors.grey[300],
-                  backgroundImage: _image != null ? FileImage(File(_image!.path)) : null,
+                  backgroundImage:
+                      _image != null ? FileImage(File(_image!.path)) : null,
                   child: _image == null
-                      ? const Icon(Icons.camera_alt, size: 50, color: Colors.grey)
+                      ? const Icon(Icons.camera_alt,
+                          size: 50, color: Colors.grey)
                       : null,
                 ),
               ),
@@ -192,8 +286,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
               _buildTextField(nameController, 'Full Name'),
               _buildTextField(emailController, 'Email Address'),
               _buildTextField(passwordController, 'Password', isPassword: true),
-              _buildTextField(confirmPasswordController, 'Confirm Password', isPassword: true),
-              _buildTextField(phoneController, 'Phone Number', keyboardType: TextInputType.phone),
+              _buildTextField(confirmPasswordController, 'Confirm Password',
+                  isPassword: true),
+              _buildTextField(phoneController, 'Phone Number',
+                  keyboardType: TextInputType.phone),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: TextField(
@@ -204,10 +300,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       icon: const Icon(Icons.location_on),
                       onPressed: _getCurrentLocation,
                     ),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     filled: true,
                     fillColor: Colors.grey[200],
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 12),
                   ),
                 ),
               ),
@@ -227,6 +325,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onChanged: (String? value) {
                           setState(() {
                             selectedRole = value;
+                            userRole = value;
                           });
                         },
                       ),
@@ -242,6 +341,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onChanged: (String? value) {
                           setState(() {
                             selectedRole = value;
+                            userRole = value;
                           });
                         },
                       ),
@@ -250,13 +350,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ],
               ),
+              _buildRoleSpecificFields(),
               SizedBox(height: screenSize.height * 0.02),
               ElevatedButton(
                 onPressed: () => _registerWithEmail(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
                 child: const Text('Register', style: TextStyle(fontSize: 16)),
               ),
@@ -266,9 +368,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Verify Email & Proceed', style: TextStyle(fontSize: 16)),
+                child: const Text('Verify Email & Proceed',
+                    style: TextStyle(fontSize: 16)),
               ),
               SizedBox(height: screenSize.height * 0.02),
               Row(
@@ -288,30 +392,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.black,
                   minimumSize: const Size(double.infinity, 50),
-                  side: const BorderSide(color: Colors.grey),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  side: const BorderSide(color: Colors.black),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset('assets/google_logo.png', height: 24),
-                    const SizedBox(width: 10),
-                    const Text('Continue with Google', style: TextStyle(fontSize: 16)),
-                  ],
-                ),
+                child: const Text('Sign Up with Google',
+                    style: TextStyle(fontSize: 16)),
               ),
-              SizedBox(height: screenSize.height * 0.02),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Already have an account?', style: TextStyle(fontSize: 14)),
-                  TextButton(
-                    onPressed: () => Navigator.pushNamed(context, '/login'),
-                    child: const Text('Login', style: TextStyle(fontSize: 14)),
-                  ),
-                ],
-              ),
-              SizedBox(height: screenSize.height * 0.02),
             ],
           ),
         ),

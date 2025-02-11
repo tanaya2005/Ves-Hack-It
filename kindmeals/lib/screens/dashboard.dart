@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:kindmeals/screens/donation_history_screen.dart';
+import 'package:kindmeals/screens/donor_profile.dart';
 import 'package:kindmeals/screens/notification_screen.dart';
+import 'package:kindmeals/screens/recipient_profile.dart';
+import 'package:kindmeals/screens/user_role.dart';
 import 'chat_screen.dart';
-import 'profile_screen.dart';
 import 'post_donation_screen.dart';
 import 'live_requests_screen.dart';
 import 'charity_screen.dart';
@@ -107,7 +109,21 @@ class Dashboard extends StatelessWidget {
               leading: const Icon(Icons.account_circle),
               title: const Text('Profile'),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+                if (userRole == "donor") {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const DonorProfile(), // Navigate to DonorProfile
+                    ),
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const RecipientProfile(), // Navigate to RecipientProfile
+                    ),
+                  );
+                }
               },
             ),
             ListTile(

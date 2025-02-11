@@ -1,7 +1,7 @@
-// ignore_for_file: unused_import, library_private_types_in_public_api
-
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LanguageSelectionPage extends StatefulWidget {
   const LanguageSelectionPage({super.key});
@@ -11,7 +11,7 @@ class LanguageSelectionPage extends StatefulWidget {
 }
 
 class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
-  String _selectedLanguage = 'en'; // Default language
+  String _selectedLanguage = 'en';
 
   final Map<String, String> languages = {
     'en': 'English',
@@ -45,12 +45,47 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
     'sr': 'Српски',
     'mlt': 'Malti',
   };
+  
+
+Future<void> saveLanguagePreference(String userId, String language) async {
+  final response = await http.post(
+    Uri.parse('http://localhost:5000/setLanguage'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'userId': userId, 'language': language}),
+  );
+
+  if (response.statusCode == 200) {
+    print('Language preference saved successfully');
+  } else {
+    print('Failed to save language preference');
+  }
+}
+
 
   void _setLanguage(String language) {
     setState(() {
       _selectedLanguage = language;
     });
-    Navigator.pushReplacementNamed(context, '/welcome');
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Confirm Language'),
+        content: Text('You have selected ${languages[language]}. Proceed?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.pushReplacementNamed(context, '/welcome');
+            },
+            child: Text('Confirm'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -59,26 +94,52 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('भाषा चुनें / Select Your Language', style: TextStyle(fontSize: 18)),
-              SizedBox(height: 16),
-              DropdownButton<String>(
-                value: _selectedLanguage,
-                items: languages.entries.map((entry) {
-                  return DropdownMenuItem(
-                    value: entry.key,
-                    child: Text(entry.value),
-                  );
-                }).toList(),
-                onChanged: (String? value) {
-                  if (value != null) {
-                    _setLanguage(value);
-                  }
-                },
+          child: Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 8,
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.language, size: 50, color: Colors.blueAccent),
+                  SizedBox(height: 16),
+                  Text(
+                    'भाषा चुनें / Select Your Language',
+                    style: GoogleFonts.lato(fontSize: 20, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    value: _selectedLanguage,
+                    icon: Icon(Icons.arrow_drop_down),
+                    decoration: InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    items: languages.entries.map((entry) {
+                      return DropdownMenuItem(
+                        value: entry.key,
+                        child: Row(
+                          children: [
+                            Icon(Icons.flag, size: 20, color: Colors.grey),
+                            SizedBox(width: 8),
+                            Text(entry.value, style: GoogleFonts.lato(fontSize: 16)),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (String? value) {
+                      if (value != null) {
+                        _setLanguage(value);
+                      }
+                    },
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
