@@ -14,8 +14,27 @@ class LiveDonationRequestsScreen extends StatefulWidget {
       _LiveDonationRequestsScreenState();
 }
 
-class _LiveDonationRequestsScreenState
-    extends State<LiveDonationRequestsScreen> {
+class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen> {
+  String _getReadableDistance(double distance) {
+    if (distance < 1000) {
+      return '${distance.toStringAsFixed(0)} m';
+    } else {
+      return '${(distance / 1000).toStringAsFixed(1)} km';
+    }
+  }
+
+  String _getLocationDisplay(Map<String, dynamic> request, double? calculatedDistance) {
+    String display = request['location'] ?? 'Location not specified';
+    
+    if (calculatedDistance != null && 
+        double.tryParse(request['latitude'] ?? '') != null && 
+        double.tryParse(request['longitude'] ?? '') != null) {
+      display += ' • ${_getReadableDistance(calculatedDistance)}';
+    }
+    
+    return display;
+  }
+
   List<Map<String, dynamic>> _donationRequests = [];
   Position? _currentPosition;
   bool _isLoading = true;
@@ -30,93 +49,91 @@ class _LiveDonationRequestsScreenState
   }
 
   Future<void> _fetchDonationRequests() async {
-  try {
-    final response = await http.get(
-      Uri.parse('http://192.168.0.100:3000/api/donations'), // Update with your server's IP
-    );
+    try {
+      final response = await http.get(
+        Uri.parse('http://192.168.0.102:3000/api/donations'),
+      );
 
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      print('API Response: $data'); // Log the API response
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          _donationRequests = data.map((item) {
+            return {
+              'foodName': item['foodName'] ?? 'Unknown Food',
+              'quantity': '${item['quantity'] ?? 0} ',
+              'expiryDate': item['expiryDate'] ?? 'Unknown',
+              'description': item['description'] ?? 'No description provided',
+              'image': item['imageUrl'] != null
+                  ? 'http://192.168.0.102:3000${item['imageUrl']}'
+                  : '',
+              'location': item['location'] ?? '',
+              'donorName': item['donorName'] ?? '',
+              'donorVerification': item['donorVerification'] ?? 'Unverified',
+              'latitude': item['latitude']?.toString() ?? '0.0',
+              'longitude': item['longitude']?.toString() ?? '0.0',
+            };
+          }).toList();
+        });
+      } else {
+        setState(() {
+          _errorMessage = 'Failed to load donations: ${response.statusCode} - ${response.body}';
+        });
+      }
+    } catch (e, stackTrace) {
+      print('Error fetching donations: $e\n$stackTrace');
       setState(() {
-        _donationRequests = data.map((item) {
-          return {
-            'foodName': item['foodName'] ?? 'Unknown Food',
-            'quantity': '${item['quantity'] ?? 0} ',
-            'expiryDate': item['expiryDate'] ?? 'Unknown',
-            'description': item['description'] ?? 'No description provided',
-            'image': item['imageUrl'] != null
-                ? 'http://192.168.0.100:3000${item['imageUrl']}' // Construct the full image URL
-                : '',
-            'location': item['location'] ?? '',
-            'donorName': item['donorName'] ?? '',
-            'donorVerification': item['donorVerification'] ?? 'Unverified',
-            'latitude': item['latitude']?.toString() ?? '0.0', // Ensure latitude is included
-            'longitude': item['longitude']?.toString() ?? '0.0', // Ensure longitude is included
-          };
-        }).toList();
+        _errorMessage = 'Error fetching donations: ${e.toString()}';
       });
-    } else {
-      setState(() {
-        _errorMessage = 'Failed to load donations: ${response.statusCode} - ${response.body}';
-      });
-    }
-  } catch (e, stackTrace) {
-    print('Error fetching donations: $e\n$stackTrace'); // Log the error and stack trace
-    setState(() {
-      _errorMessage = 'Error fetching donations: ${e.toString()}';
-    });
-  } finally {
-    setState(() {
-      _isLoading = false;
-    });
-  }
-}
-
-  Future<void> _getCurrentLocation() async {
-  try {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
+    } finally {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Location services are disabled. Please enable them.';
       });
-      return;
     }
+  }
 
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
+  Future<void> _getCurrentLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Location permissions are denied.';
+          _errorMessage = 'Location services are disabled. Please enable them.';
         });
         return;
       }
-    }
 
-    if (permission == LocationPermission.deniedForever) {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = 'Location permissions are denied.';
+          });
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Location permissions are permanently denied. Please enable them from settings.';
+        });
+        return;
+      }
+
+      _currentPosition = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      _sortByDistance();
+    } catch (e, stackTrace) {
+      print('Error getting location: $e\n$stackTrace');
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Location permissions are permanently denied. Please enable them from settings.';
+        _errorMessage = 'Error getting location: ${e.toString()}';
       });
-      return;
     }
-
-    _currentPosition = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-    print('Current Position: ${_currentPosition?.latitude}, ${_currentPosition?.longitude}'); // Log the coordinates
-    _sortByDistance();
-  } catch (e, stackTrace) {
-    print('Error getting location: $e\n$stackTrace'); // Log the error and stack trace
-    setState(() {
-      _isLoading = false;
-      _errorMessage = 'Error getting location: ${e.toString()}';
-    });
   }
-}
 
   void _sortByDistance() {
     if (_currentPosition != null) {
@@ -138,8 +155,7 @@ class _LiveDonationRequestsScreenState
     }
   }
 
-  double _calculateDistance(
-      double startLat, double startLon, double endLat, double endLon) {
+  double _calculateDistance(double startLat, double startLon, double endLat, double endLon) {
     return Geolocator.distanceBetween(startLat, startLon, endLat, endLon);
   }
 
@@ -148,12 +164,11 @@ class _LiveDonationRequestsScreenState
       context,
       MaterialPageRoute(
         builder: (context) => ItemDetailScreen(
-            request:
-                request.map((key, value) => MapEntry(key, value.toString()))),
+          request: request.map((key, value) => MapEntry(key, value.toString())),
+        ),
       ),
     );
   }
-  
 
   Widget _buildErrorWidget() {
     return Center(
@@ -183,8 +198,7 @@ class _LiveDonationRequestsScreenState
               label: const Text('Retry'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
             ),
           ],
@@ -227,22 +241,14 @@ class _LiveDonationRequestsScreenState
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: _donationRequests.map((request) {
-                        double distance = _currentPosition != null
+                        double? distance = _currentPosition != null
                             ? _calculateDistance(
                                 _currentPosition!.latitude,
                                 _currentPosition!.longitude,
-                                double.tryParse(request['latitude'] ?? '0.0') ??
-                                    0.0,
-                                double.tryParse(
-                                        request['longitude'] ?? '0.0') ??
-                                    0.0,
+                                double.tryParse(request['latitude'] ?? '0.0') ?? 0.0,
+                                double.tryParse(request['longitude'] ?? '0.0') ?? 0.0,
                               )
-                            : 0.0;
-
-                        if (distance == 0.0) {
-                          print(
-                              'Invalid coordinates for donation: ${request['foodName']}');
-                        }
+                            : null;
 
                         return Card(
                           elevation: 5,
@@ -277,43 +283,37 @@ class _LiveDonationRequestsScreenState
                                   ),
                                 ),
                                 const SizedBox(height: 16),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        request['foodName']!,
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.location_on,
-                                          color: Colors.green,
-                                          size: 18,
-                                        ),
-                                        Text(
-                                          '${(distance / 1000).toStringAsFixed(1)} km',
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                Text(
+                                  request['foodName']!,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text('Quantity: ${request['quantity']}'),
                                 const SizedBox(height: 8),
                                 Text('Expiry Date: ${request['expiryDate']}'),
                                 const SizedBox(height: 8),
-                                Text('Location: ${request['location']}'),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.location_on,
+                                      color: Colors.green,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        _getLocationDisplay(request, distance),
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                                 const SizedBox(height: 8),
                                 Text('Donor: ${request['donorName']}'),
                                 const SizedBox(height: 16),
@@ -322,8 +322,7 @@ class _LiveDonationRequestsScreenState
                                     onPressed: () => _viewItem(request),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.green,
-                                      minimumSize:
-                                          const Size(double.infinity, 60),
+                                      minimumSize: const Size(double.infinity, 60),
                                     ),
                                     child: const Text(
                                       'View Item',

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.0.100:3000/api'; // For Android Emulator
+  static const String baseUrl = 'http://192.168.0.102:3000/api'; // For Android Emulator
   // Use 'http://localhost:3000/api' for iOS simulator
   
   static Future<Map<String, dynamic>> registerUser(Map<String, dynamic> userData, String userType) async {
