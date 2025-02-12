@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'edit_recipient_profile.dart';
 import 'change_password_screen.dart';
 import 'login_screen.dart';
+import 'user_data.dart';
 
 class RecipientProfile extends StatefulWidget {
   const RecipientProfile({super.key});
@@ -11,12 +12,6 @@ class RecipientProfile extends StatefulWidget {
 }
 
 class _RecipientProfileState extends State<RecipientProfile> {
-  String name = 'Jane Smith';
-  String email = 'janesmith@recipient.com';
-  String phone = '9876543210';
-  String location = 'Hope Avenue, Charity City';
-  String recipientId = 'R123456';
-  String about = 'Committed to improving lives through your generosity.';
   String currentPassword = 'password123';
 
   @override
@@ -39,10 +34,10 @@ class _RecipientProfileState extends State<RecipientProfile> {
           _buildProfileHeader(),
           const SizedBox(height: 24),
           _buildProfileSection('Account Details', [
-            _buildInfoRow(Icons.phone, 'Phone', phone),
-            _buildInfoRow(Icons.location_on, 'Location', location),
-            _buildInfoRow(Icons.account_box, 'Recipient ID', recipientId),
-            _buildInfoRow(Icons.info, 'About', about),
+            _buildInfoRow(Icons.phone, 'Phone', UserData.userPhone ?? 'Not set'),
+            _buildInfoRow(Icons.location_on, 'Location', UserData.userLocation ?? 'Not set'),
+            _buildInfoRow(Icons.account_box, 'Recipient ID', UserData.userRecipientId ?? 'Not set'),
+            _buildInfoRow(Icons.info, 'About', UserData.userAbout ?? 'Not set'),
           ]),
           const SizedBox(height: 16),
           _buildProfileSection('Settings', [
@@ -51,24 +46,24 @@ class _RecipientProfileState extends State<RecipientProfile> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => EditRecipientProfileScreen(
-                    name: name,
-                    email: email,
-                    phone: phone,
-                    location: location,
-                    recipientId: recipientId,
-                    about: about,
+                    name: UserData.userName ?? '',
+                    email: UserData.userEmail ?? '',
+                    phone: UserData.userPhone ?? '',
+                    location: UserData.userLocation ?? '',
+                    recipientId: UserData.userRecipientId ?? '',
+                    about: UserData.userAbout ?? '',
                   ),
                 ),
               );
 
               if (updatedProfile != null) {
                 setState(() {
-                  name = updatedProfile['name'];
-                  email = updatedProfile['email'];
-                  phone = updatedProfile['phone'];
-                  location = updatedProfile['location'];
-                  recipientId = updatedProfile['recipientId'];
-                  about = updatedProfile['about'];
+                  UserData.userName = updatedProfile['name'];
+                  UserData.userEmail = updatedProfile['email'];
+                  UserData.userPhone = updatedProfile['phone'];
+                  UserData.userLocation = updatedProfile['location'];
+                  UserData.userRecipientId = updatedProfile['recipientId'];
+                  UserData.userAbout = updatedProfile['about'];
                 });
               }
             }),
@@ -76,8 +71,7 @@ class _RecipientProfileState extends State<RecipientProfile> {
               final newPassword = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChangePasswordScreen(
-                      currentPassword: currentPassword),
+                  builder: (context) => ChangePasswordScreen(currentPassword: currentPassword),
                 ),
               );
 
@@ -108,11 +102,11 @@ class _RecipientProfileState extends State<RecipientProfile> {
           ),
           const SizedBox(height: 16),
           Text(
-            name,
+            UserData.userName ?? 'No Name',
             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           Text(
-            email,
+            UserData.userEmail ?? 'No Email',
             style: const TextStyle(fontSize: 16, color: Colors.grey),
           ),
         ],
@@ -177,6 +171,7 @@ class _RecipientProfileState extends State<RecipientProfile> {
                 ),
               ),
               onPressed: () {
+                UserData.clearUserData();
                 Navigator.of(context).pop();
                 Navigator.pushReplacement(
                   context,

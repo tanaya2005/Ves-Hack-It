@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'edit_donor_profile.dart';
 import 'change_password_screen.dart';
 import 'login_screen.dart';
+import 'user_data.dart';
 
 class DonorProfile extends StatefulWidget {
   const DonorProfile({super.key});
@@ -11,13 +12,7 @@ class DonorProfile extends StatefulWidget {
 }
 
 class _DonorProfileState extends State<DonorProfile> {
-  String name = 'John Doe';
-  String email = 'johndoe@donor.com';
-  String phone = '1234567890';
-  String location = 'Donor Street, Kind Town';
-  String organization = 'Giving Hearts';
-  String about = 'Dedicated to making a difference.';
-  String currentPassword = 'password123';
+  String currentPassword = 'password123'; // Added missing variable
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +34,9 @@ class _DonorProfileState extends State<DonorProfile> {
           _buildProfileHeader(),
           const SizedBox(height: 24),
           _buildProfileSection('Account Details', [
-            _buildInfoRow(Icons.phone, 'Phone', phone),
-            _buildInfoRow(Icons.location_on, 'Location', location),
-            _buildInfoRow(Icons.business, 'Organization', organization),
-            _buildInfoRow(Icons.info, 'About', about),
+            _buildInfoRow(Icons.phone, 'Phone', UserData.userPhone ?? 'Not set'),
+            _buildInfoRow(Icons.location_on, 'Location', UserData.userLocation ?? 'Not set'),
+            _buildInfoRow(Icons.business, 'Organization', UserData.userOrganization ?? 'Not set'),
           ]),
           const SizedBox(height: 16),
           _buildProfileSection('Settings', [
@@ -51,24 +45,22 @@ class _DonorProfileState extends State<DonorProfile> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => EditDonorProfileScreen(
-                    name: name,
-                    email: email,
-                    phone: phone,
-                    location: location,
-                    organization: organization,
-                    about: about,
+                    name: UserData.userName ?? '',
+                    email: UserData.userEmail ?? '',
+                    phone: UserData.userPhone ?? '',
+                    location: UserData.userLocation ?? '',
+                    organization: UserData.userOrganization ?? '',
                   ),
                 ),
               );
 
               if (updatedProfile != null) {
                 setState(() {
-                  name = updatedProfile['name'];
-                  email = updatedProfile['email'];
-                  phone = updatedProfile['phone'];
-                  location = updatedProfile['location'];
-                  organization = updatedProfile['organization'];
-                  about = updatedProfile['about'];
+                  UserData.userName = updatedProfile['name'];
+                  UserData.userEmail = updatedProfile['email'];
+                  UserData.userPhone = updatedProfile['phone'];
+                  UserData.userLocation = updatedProfile['location'];
+                  UserData.userOrganization = updatedProfile['organization'];
                 });
               }
             }),
@@ -76,8 +68,7 @@ class _DonorProfileState extends State<DonorProfile> {
               final newPassword = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChangePasswordScreen(
-                      currentPassword: currentPassword),
+                  builder: (context) => ChangePasswordScreen(currentPassword: currentPassword),
                 ),
               );
 
@@ -108,11 +99,11 @@ class _DonorProfileState extends State<DonorProfile> {
           ),
           const SizedBox(height: 16),
           Text(
-            name,
+            UserData.userName ?? 'No Name',
             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           Text(
-            email,
+            UserData.userEmail ?? 'No Email',
             style: const TextStyle(fontSize: 16, color: Colors.grey),
           ),
         ],
@@ -177,6 +168,7 @@ class _DonorProfileState extends State<DonorProfile> {
                 ),
               ),
               onPressed: () {
+                UserData.clearUserData();
                 Navigator.of(context).pop();
                 Navigator.pushReplacement(
                   context,

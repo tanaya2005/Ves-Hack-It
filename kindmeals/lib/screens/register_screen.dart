@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kindmeals/screens/api_service.dart';
+import 'package:kindmeals/screens/user_data.dart';
 import 'user_role.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -20,7 +21,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   // New controllers for role-specific fields
@@ -30,7 +32,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   XFile? _image;
-  String? selectedRole; // Variable to store the selected role ('donor', 'recipient')
+  String?
+      selectedRole; // Variable to store the selected role ('donor', 'recipient')
 
   // To handle the current location fetching
   Future<void> _getCurrentLocation() async {
@@ -74,12 +77,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _registerWithEmail(BuildContext context) async {
     if (selectedRole == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a role (Donor, Recipient)')),
+        const SnackBar(
+            content: Text('Please select a role (Donor, Recipient)')),
       );
       return;
     }
 
-    if (passwordController.text.trim() != confirmPasswordController.text.trim()) {
+    if (passwordController.text.trim() !=
+        confirmPasswordController.text.trim()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Passwords do not match!')),
       );
@@ -87,41 +92,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
 
     try {
-      final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      final UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
-
+      print(userCredential.user);
       User? user = userCredential.user;
+      print('User: $user');
       if (user != null) {
-        // Prepare user data for MongoDB with role-specific fields
         final userData = {
           'name': nameController.text.trim(),
           'email': emailController.text.trim(),
           'phone': phoneController.text.trim(),
           'location': addressController.text.trim(),
           'currentPassword': passwordController.text.trim(),
-          // Include role-specific fields based on selection
-          if (selectedRole == 'donor') 'organization': organizationController.text.trim(),
+          if (selectedRole == 'donor')
+            'organization': organizationController.text.trim(),
           if (selectedRole == 'recipient') ...{
             'recipientId': recipientIdController.text.trim(),
             'about': aboutController.text.trim(),
           },
         };
-
-        try {
-          final response = await ApiService.registerUser(userData, selectedRole!);
-          print('MongoDB Registration successful: ${response['message']}');
-
-          if (!user.emailVerified) {
-            await user.sendEmailVerification();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Verification email sent. Please verify your email.')),
-            );
-          }
-        } catch (mongoError) {
-          await user.delete();
-          throw Exception('Failed to save user data: $mongoError');
+        final response = await ApiService.registerUser(userData, selectedRole!);
+        print('MongoDB Registration successful: ${response['message']}');
+        print(userData.runtimeType);
+        print('User: ${response['user']}');
+        // Set user data in UserData class
+        UserData.setUserData(response['user'], selectedRole!);
+        
+        if (!user.emailVerified) {
+          await user.sendEmailVerification();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content:
+                    Text('Verification email sent. Please verify your email.')),
+          );
         }
       }
     } catch (e) {
@@ -131,11 +137,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
     }
   }
+
   // Check if email is verified
   Future<void> _checkEmailVerification() async {
     User? user = _auth.currentUser;
     await user?.reload();
-    if (user != null && user.emailVerified) {
+    if (user!.emailVerified) {
       Navigator.pushReplacementNamed(context, '/dashboard');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -187,6 +194,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _image = pickedImage;
     });
   }
+
   Widget _buildRoleSpecificFields() {
     if (selectedRole == 'donor') {
       return _buildTextField(
@@ -214,7 +222,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return const SizedBox.shrink();
   }
 
-  
   // Build TextField widget
   Widget _buildTextField(
     TextEditingController controller,
@@ -235,7 +242,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           labelText: label,
           hintText: hint,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
           filled: true,
           fillColor: Colors.grey[200],
         ),

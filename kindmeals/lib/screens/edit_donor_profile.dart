@@ -8,7 +8,7 @@ class EditDonorProfileScreen extends StatefulWidget {
   final String phone;
   final String location;
   final String organization;
-  final String about;
+  // final String about;
   final String profileImageUrl;
 
   const EditDonorProfileScreen({
@@ -18,7 +18,7 @@ class EditDonorProfileScreen extends StatefulWidget {
     required this.phone,
     required this.location,
     required this.organization,
-    required this.about,
+    // required this.about,
     this.profileImageUrl = '',
   });
 
@@ -32,7 +32,7 @@ class _EditDonorProfileScreenState extends State<EditDonorProfileScreen> {
   late TextEditingController phoneController;
   late TextEditingController locationController;
   late TextEditingController organizationController;
-  late TextEditingController aboutController;
+  // late TextEditingController aboutController;
   File? _image;
 
   @override
@@ -43,7 +43,7 @@ class _EditDonorProfileScreenState extends State<EditDonorProfileScreen> {
     phoneController = TextEditingController(text: widget.phone);
     locationController = TextEditingController(text: widget.location);
     organizationController = TextEditingController(text: widget.organization);
-    aboutController = TextEditingController(text: widget.about);
+    // aboutController = TextEditingController(text: widget.about);
   }
 
   @override
@@ -53,7 +53,7 @@ class _EditDonorProfileScreenState extends State<EditDonorProfileScreen> {
     phoneController.dispose();
     locationController.dispose();
     organizationController.dispose();
-    aboutController.dispose();
+    // aboutController.dispose();
     super.dispose();
   }
 
@@ -73,7 +73,7 @@ class _EditDonorProfileScreenState extends State<EditDonorProfileScreen> {
       'phone': phoneController.text,
       'location': locationController.text,
       'organization': organizationController.text,
-      'about': aboutController.text,
+      // 'about': aboutController.text,
       'profileImage': _image?.path ?? widget.profileImageUrl,
     });
   }
@@ -121,7 +121,7 @@ class _EditDonorProfileScreenState extends State<EditDonorProfileScreen> {
             buildTextField('Phone', phoneController, keyboardType: TextInputType.phone),
             buildTextField('Location', locationController),
             buildTextField('Organization', organizationController),
-            buildTextField('About', aboutController, maxLines: 3),
+            // buildTextField('About', aboutController, maxLines: 3),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: saveProfile,

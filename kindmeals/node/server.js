@@ -118,70 +118,58 @@ app.get('/api/donations', async (req, res) => {
   }
 });
 
-// New Donor endpoints
-app.post('/api/donors', async (req, res) => {
+app.put('/api/donors', async (req, res) => {
   try {
-    const { name, email, phone, location, organization, currentPassword } = req.body;
-    
-    // Validate required fields
-    if (!name || !email || !phone || !location || !organization || !currentPassword) {
-      return res.status(400).json({ error: 'Missing required fields.' });
+    const donor = await Donor.findByIdAndUpdate(
+      req.body,
+      { new: true }
+    );
+    if (!donor) {
+      return res.status(404).json({ error: 'Donor not found' });
     }
-
-    // Check if email already exists
-    const existingDonor = await Donor.findOne({ email });
-    if (existingDonor) {
-      return res.status(400).json({ error: 'Email already registered' });
-    }
-
-    const donor = new Donor({
-      name,
-      email,
-      phone,
-      location,
-      organization,
-      currentPassword
-    });
-
-    await donor.save();
-    res.status(201).json({ message: 'Donor registered successfully!', donor });
+    res.json(donor);
   } catch (error) {
-    console.error('Error registering donor:', error);
-    res.status(500).json({ error: 'Error registering donor.' });
+    res.status(500).json({ error: 'Error updating donor profile' });
   }
 });
 
-// New Recipient endpoints
-app.post('/api/recipients', async (req, res) => {
+app.put('/api/recipients', async (req, res) => {
   try {
-    const { name, email, phone, location, recipientId, currentPassword, about } = req.body;
-    
-    // Validate required fields
-    if (!name || !email || !phone || !location || !recipientId || !currentPassword || !about) {
-      return res.status(400).json({ error: 'Missing required fields.' });
+    const recipient = await Recipient.findByIdAndUpdate(
+      req.body,
+      { new: true }
+    );
+    if (!recipient) {
+      return res.status(404).json({ error: 'Recipient not found' });
     }
-
-    // Check if email already exists
-    const existingRecipient = await Recipient.findOne({ email });
-    if (existingRecipient) {
-      return res.status(400).json({ error: 'Email already registered' });
-    }
-
-    const recipient = new Recipient({
-      name,
-      email,
-      phone,
-      location,
-      recipientId,
-      currentPassword,
-      about
-    });
-
-    await recipient.save();
-    res.status(201).json({ message: 'Recipient registered successfully!', recipient });
+    res.json(recipient);
   } catch (error) {
-    console.error('Error registering recipient:', error);
-    res.status(500).json({ error: 'Error registering recipient.' });
+    res.status(500).json({ error: 'Error updating recipient profile' });
+  }
+});
+
+// Get user profile endpoint
+app.get('/api/donors/:id', async (req, res) => {
+  try {
+    const donor = await Donor.findById(req.params.id);
+    if (!donor) {
+      return res.status(404).json({ error: 'Donor not found' });
+    }
+    res.json(donor);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching donor profile' });
+  }
+});
+
+app.get('/api/recipients/:id', async (req, res) => {
+  try {
+    const recipient = await Recipient.findById(req.params.id);
+    if (!recipient) {
+      return res.status(404).json({ error: 'Recipient not found' });
+    }
+    res.json(recipient);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching recipient profile' });
   }
 });
 
