@@ -12,36 +12,42 @@ class VolunteerProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.green,
-        unselectedItemColor: Colors.grey,
-        currentIndex: 1, // Profile selected
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacementNamed(
-                context, '/ordersPage'); // To be implemented
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Orders',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Account',
-          ),
-        ],
-      ),
       body: Column(
         children: [
           const SizedBox(height: 40),
-          const Center(
-            child: CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage(
-                  'assets/profile_pic.png'), // Change this to network image if needed
-            ),
+          Stack(
+            alignment: Alignment.topRight,
+            children: [
+              const Center(
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundImage: AssetImage('assets/profile_pic.png'),
+                ),
+              ),
+              Positioned(
+                right: 30,
+                top: 5,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "4.9",
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      Icon(Icons.star, color: Colors.white, size: 16),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 10),
           const Text(
@@ -103,6 +109,30 @@ class VolunteerProfileScreen extends StatelessWidget {
           const SizedBox(height: 10),
         ],
       ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _bottomNavButton(
+              context,
+              icon: Icons.list,
+              label: "Orders",
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/ordersPage');
+              },
+            ),
+            _bottomNavButton(
+              context,
+              icon: Icons.person,
+              label: "Account",
+              onPressed: () {
+                // Already on account page
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -123,8 +153,26 @@ class VolunteerProfileScreen extends StatelessWidget {
     );
   }
 
+  Widget _bottomNavButton(BuildContext context,
+      {required IconData icon,
+      required String label,
+      required VoidCallback onPressed}) {
+    return Expanded(
+      child: OutlinedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon, color: Colors.green),
+        label: Text(label, style: const TextStyle(color: Colors.green)),
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          side: const BorderSide(color: Colors.green),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        ),
+      ),
+    );
+  }
+
   void _logout(BuildContext context) {
-    // Implement logout logic
     Navigator.pushReplacementNamed(context, '/registerLogin');
   }
 }

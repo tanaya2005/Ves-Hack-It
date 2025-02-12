@@ -1,9 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+// import 'package:kindmeals/screens/volunteer_document_dashboard.dart';
 
 class DrivingLicensePage extends StatefulWidget {
-  const DrivingLicensePage({super.key});
+  final Function(bool) onComplete; // Accept onComplete callback
+
+  const DrivingLicensePage({super.key, required this.onComplete});
 
   @override
   _DrivingLicensePageState createState() => _DrivingLicensePageState();
@@ -13,9 +16,10 @@ class _DrivingLicensePageState extends State<DrivingLicensePage> {
   final TextEditingController licenseNumberController = TextEditingController();
   File? _licenseImage;
   final picker = ImagePicker();
+  String? errorMessage;
 
   Future<void> _pickImage() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _licenseImage = File(pickedFile.path);
@@ -23,29 +27,44 @@ class _DrivingLicensePageState extends State<DrivingLicensePage> {
     }
   }
 
+  void _submitDrivingLicense() {
+    if (licenseNumberController.text.isEmpty || _licenseImage == null) {
+      setState(() {
+        errorMessage = "All fields are required.";
+      });
+      return;
+    }
+
+    // ✅ Mark Personal Documents as completed
+    widget.onComplete(true);
+
+    Navigator.pop(
+        context, true); // ✅ Return true when Driving License is completed
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Driving License Details'),
-        backgroundColor: Colors.green,
-      ),
+          title: const Text("Driving License Details"),
+          backgroundColor: Colors.green),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Enter your Driving License Number',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Text("Enter Driving License Number"),
             TextField(
               controller: licenseNumberController,
-              decoration: const InputDecoration(
-                labelText: 'Driving License Number',
-                border: OutlineInputBorder(),
+              maxLength: 16,
+              decoration: InputDecoration(
+                labelText: "Driving License Number",
+                border: const OutlineInputBorder(),
+                errorText: errorMessage,
               ),
             ),
             const SizedBox(height: 20),
-            const Text('Upload a picture of your Driving License'),
+            const Text("Upload a picture of your Driving License"),
             const SizedBox(height: 10),
             GestureDetector(
               onTap: _pickImage,
@@ -65,14 +84,12 @@ class _DrivingLicensePageState extends State<DrivingLicensePage> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/documentVerification');
-              },
+              onPressed: _submitDrivingLicense,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 minimumSize: const Size(double.infinity, 50),
               ),
-              child: const Text('Submit'),
+              child: const Text("Submit"),
             ),
           ],
         ),

@@ -1,16 +1,41 @@
 import 'package:flutter/material.dart';
 
 class EmergencyDetailsPage extends StatefulWidget {
-  const EmergencyDetailsPage({super.key});
+  final Function(bool) onComplete; // Callback function
+
+  const EmergencyDetailsPage({super.key, required this.onComplete});
 
   @override
-  _EmergencyDetailsPageState createState() => _EmergencyDetailsPageState();
+  EmergencyDetailsPageState createState() => EmergencyDetailsPageState();
 }
 
-class _EmergencyDetailsPageState extends State<EmergencyDetailsPage> {
-  final TextEditingController emergencyContact1Controller = TextEditingController();
-  final TextEditingController emergencyContact2Controller = TextEditingController();
+class EmergencyDetailsPageState extends State<EmergencyDetailsPage> {
+  final TextEditingController emergencyContact1Controller =
+      TextEditingController();
+  final TextEditingController emergencyContact2Controller =
+      TextEditingController();
   final TextEditingController addressController = TextEditingController();
+  bool isCompleted = false;
+  String? errorMessage;
+
+  void submitEmergencyDetails() {
+    setState(() {
+      errorMessage = null;
+    });
+
+    if (emergencyContact1Controller.text.isEmpty ||
+        emergencyContact2Controller.text.isEmpty ||
+        addressController.text.isEmpty) {
+      setState(() {
+        errorMessage = "Please fill in all fields before submitting.";
+      });
+      return;
+    }
+
+    // Mark as completed and go back to the dashboard
+    widget.onComplete(true);
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,14 +49,15 @@ class _EmergencyDetailsPageState extends State<EmergencyDetailsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Emergency Contact Information',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Emergency Contact Information',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const Text(
               'This information is confidential and will be safe with us.',
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
             const SizedBox(height: 10),
-
             TextField(
               controller: emergencyContact1Controller,
               keyboardType: TextInputType.phone,
@@ -41,7 +67,6 @@ class _EmergencyDetailsPageState extends State<EmergencyDetailsPage> {
               ),
             ),
             const SizedBox(height: 10),
-
             TextField(
               controller: emergencyContact2Controller,
               keyboardType: TextInputType.phone,
@@ -51,7 +76,6 @@ class _EmergencyDetailsPageState extends State<EmergencyDetailsPage> {
               ),
             ),
             const SizedBox(height: 10),
-
             TextField(
               controller: addressController,
               maxLines: 3,
@@ -60,12 +84,15 @@ class _EmergencyDetailsPageState extends State<EmergencyDetailsPage> {
                 border: OutlineInputBorder(),
               ),
             ),
+            const SizedBox(height: 10),
+            if (errorMessage != null)
+              Text(
+                errorMessage!,
+                style: const TextStyle(color: Colors.red),
+              ),
             const SizedBox(height: 20),
-
             ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/documentVerification');
-              },
+              onPressed: submitEmergencyDetails,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 minimumSize: const Size(double.infinity, 50),

@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:kindmeals/screens/feedback_form_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:kindmeals/screens/bank_account_details.dart';
 import 'package:kindmeals/screens/driving_license_details.dart';
 import 'package:kindmeals/screens/emergency_details.dart';
@@ -14,6 +11,13 @@ import 'screens/volunteer_document_dashboard.dart';
 import 'screens/personal_documents_upload.dart';
 import 'screens/aadhar_upload.dart';
 import 'screens/registration_status.dart';
+
+import 'firebase_options.dart';
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
+import 'theme.dart';
 import 'screens/welcome_splash.dart';
 import 'screens/register_login.dart';
 import 'screens/login_screen.dart';
@@ -21,12 +25,31 @@ import 'screens/forgot_password.dart';
 import 'screens/role_selection.dart';
 import 'screens/chat_screen.dart';
 import 'screens/dashboard.dart';
-import 'theme.dart';
 import 'screens/volunteer_profile_screen.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(const KindMealsApp());
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    runApp(const KindMealsApp());
+  } catch (e) {
+    print('Error initializing app: $e');
+    // Show a more user-friendly error
+    runApp(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Text(
+              'Error initializing app. Please check your connection.',
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class KindMealsApp extends StatelessWidget {
@@ -35,37 +58,104 @@ class KindMealsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'KindMeals',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      home: LanguageSelectionPage(), // Language Selection as the first screen
-      routes: {
-        '/welcome': (context) => WelcomeSplashScreen(),
-        '/registerLogin': (context) => RegisterLoginPage(),
-        '/login': (context) => LoginScreen(),
-        '/forgotPassword': (context) => ForgotPasswordScreen(),
-        '/roleSelection': (context) => RoleSelection(),
-        '/register': (context) => RegisterScreen(),
-        '/dashboard': (context) => Dashboard(),
-        '/chatScreen': (context) => ChatScreen(
-              recipientName: "Test User",
-              onMessageSent: (String message) {},
-            ),
-        '/volunteer_dashboard': (context) => VolunteerScreen(),
-        '/volunteer_document_dashboard': (context) =>
-            VolunteerDocumentDashboard(),
-        '/volunteerLogin': (context) => VolunteerLoginPage(),
-        '/personalDocuments': (context) => const PersonalDocumentsUpload(),
-        '/aadharUpload': (context) => AadharUploadPage(),
-        '/registrationStatus': (context) => const RegistrationStatus(),
-        '/vehicleDetails': (context) => const VehicleDetailsPage(),
-        '/panCardDetails': (context) => const PanCardDetailsPage(),
-        '/drivingLicenseDetails': (context) => const DrivingLicensePage(),
-        '/bankAccountDetails': (context) => const BankAccountDetailsPage(),
-        '/emergencyDetails': (context) => const EmergencyDetailsPage(),
-        '/profile': (context) => const VolunteerProfileScreen(),
-      },
-    );
+        title: 'KindMeals',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        home:
+            LanguageSelectionPage(), // Start with your existing LanguageSelectionScreen
+        routes: {
+          '/welcome': (context) => WelcomeSplashScreen(),
+          '/registerLogin': (context) => RegisterLoginPage(),
+          '/login': (context) => LoginScreen(),
+          '/forgotPassword': (context) => ForgotPasswordScreen(),
+          '/roleSelection': (context) => RoleSelection(),
+          '/register': (context) => RegisterScreen(),
+          '/dashboard': (context) => Dashboard(),
+          '/chatScreen': (context) => ChatScreen(
+                recipientName: "Test User",
+                onMessageSent: (String message) {},
+              ),
+          '/volunteer_dashboard': (context) => VolunteerScreen(),
+          '/profileScreen': (context) => const VolunteerProfileScreen(),
+          '/volunteer_document_dashboard': (context) =>
+              VolunteerDocumentDashboard(),
+          '/volunteerLogin': (context) => VolunteerLoginPage(),
+          '/personalDocuments': (context) => PersonalDocumentsUpload(
+                onComplete: (bool completed) {
+                  if (completed) {
+                    print("All documents uploaded! ✅");
+                  }
+                },
+              ),
+          '/aadharUpload': (context) => AadharUploadPage(
+                onComplete: (bool completed) {
+                  _updatePersonalDocumentsCompletion(
+                      context, "Aadhar", completed);
+                },
+              ),
+          '/panCardDetails': (context) => PanCardDetailsPage(
+                onComplete: (bool completed) {
+                  _updatePersonalDocumentsCompletion(context, "PAN", completed);
+                },
+              ),
+          '/drivingLicenseDetails': (context) => DrivingLicensePage(
+                onComplete: (bool completed) {
+                  _updatePersonalDocumentsCompletion(
+                      context, "Driving License", completed);
+                },
+              ),
+          '/registrationStatus': (context) => const RegistrationStatus(),
+          '/vehicleDetails': (context) => VehicleDetailsPage(
+                onComplete: (bool completed) {
+                  final dashboardState = context.findAncestorStateOfType<
+                      VolunteerDocumentDashboardState>();
+                  if (dashboardState != null) {
+                    dashboardState.updateCompletionStatus(
+                        "Vehicle Details", completed);
+                  }
+                },
+              ),
+          '/bankAccountDetails': (context) => BankAccountDetailsPage(
+                onComplete: (bool completed) {
+                  if (completed) {
+                    final dashboardState = context.findAncestorStateOfType<
+                        VolunteerDocumentDashboardState>();
+                    if (dashboardState != null) {
+                      dashboardState.updateCompletionStatus(
+                          'Bank Account Details', true);
+                    }
+                  }
+                },
+              ),
+          '/emergencyDetails': (context) => EmergencyDetailsPage(
+                onComplete: (bool completed) {
+                  if (completed) {
+                    final dashboardState = context.findAncestorStateOfType<
+                        VolunteerDocumentDashboardState>();
+                    if (dashboardState != null) {
+                      dashboardState.updateCompletionStatus(
+                          'Emergency Details', true);
+                    }
+                  }
+                },
+              ),
+        });
+  }
+
+  /// ✅ Function to check and update the completion status of Personal Documents
+  static void _updatePersonalDocumentsCompletion(
+      BuildContext context, String section, bool status) {
+    final dashboardState =
+        context.findAncestorStateOfType<VolunteerDocumentDashboardState>();
+
+    if (dashboardState != null) {
+      dashboardState.updateCompletionStatus(section, status);
+
+      /// 🚀 If "Personal Documents" are completed, move them to completed section
+      if (dashboardState.completedDocuments["Personal Documents"] == true) {
+        dashboardState.moveToCompletedDocuments();
+      }
+    }
   }
 }
 
@@ -77,27 +167,44 @@ class AuthCheck extends StatefulWidget {
 }
 
 class _AuthCheckState extends State<AuthCheck> {
-  String? userSession;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void initState() {
     super.initState();
-    _checkSession();
+    // Listen for authentication state changes
+    _auth.authStateChanges().listen((User? user) {
+      if (user != null) {
+        // Fetch user data from Firestore on login
+        _fetchUserData(user);
+        // If the user is logged in, navigate to the dashboard
+        Navigator.pushReplacementNamed(context, '/dashboard');
+      } else {
+        // If not, navigate to the login screen
+        Navigator.pushReplacementNamed(context, '/login');
+      }
+    });
   }
 
-  Future<void> _checkSession() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    userSession = prefs.getString('volunteerSession');
+  // Fetch user data from Firestore
+  Future<void> _fetchUserData(User user) async {
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
 
-    if (userSession != null) {
-      Navigator.pushReplacementNamed(context, '/volunteer_dashboard');
+    if (userDoc.exists) {
+      var userData = userDoc.data();
+      print("User Data: $userData");
+      // Handle the user data, e.g., save it in a state variable
     } else {
-      Navigator.pushReplacementNamed(context, '/volunteerLogin');
+      print("User data not found.");
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Show a loading indicator while checking authentication state
     return Scaffold(
       body: Center(child: CircularProgressIndicator()),
     );
@@ -105,19 +212,19 @@ class _AuthCheckState extends State<AuthCheck> {
 }
 
 class LogoutButton extends StatelessWidget {
-  const LogoutButton({super.key});
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<void> _logout(BuildContext context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('volunteerSession');
-    Navigator.pushReplacementNamed(context, '/volunteerLogin');
-  }
+  LogoutButton({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () => _logout(context),
-      child: const Text('Log Out'),
+      onPressed: () async {
+        await _auth.signOut();
+        // After logging out, navigate to the register login screen
+        Navigator.pushReplacementNamed(context, '/registerLogin');
+      },
+      child: Text('Log Out'),
     );
   }
 }
