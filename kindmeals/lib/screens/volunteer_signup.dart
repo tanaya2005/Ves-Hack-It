@@ -1,59 +1,48 @@
-// ignore_for_file: use_build_context_synchronously, avoid_print
-
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class VolunteerSignup extends StatelessWidget {
+class VolunteerSignup extends StatefulWidget {
+  const VolunteerSignup({super.key});
+
+  @override
+  _VolunteerSignupState createState() => _VolunteerSignupState();
+}
+
+class _VolunteerSignupState extends State<VolunteerSignup> {
   final TextEditingController fullNameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  VolunteerSignup({super.key});
+  bool _isLoading = false;
+  final String apiUrl =
+      "http://192.168.29.121:5000/signup"; // Change for real device
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  Future<void> _signUp() async {
+    setState(() => _isLoading = true);
 
-  // Email/Password Sign-Up
-  Future<void> _signUpWithEmail(BuildContext context) async {
-    try {
-      await _auth.createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
-      Navigator.pushReplacementNamed(
-          context, '/volunteer_document_dashboard'); // Redirect after signup
-    } catch (e) {
-      print('Email Sign-Up Error: $e');
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "fullName": fullNameController.text.trim(),
+        "phone": phoneController.text.trim(),
+        "address": addressController.text.trim(),
+        "email": emailController.text.trim(),
+        "password": passwordController.text.trim(),
+      }),
+    );
+
+    setState(() => _isLoading = false);
+
+    if (response.statusCode == 201) {
+      Navigator.pushReplacementNamed(context, '/volunteer_document_dashboard');
+    } else {
+      final data = jsonDecode(response.body);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
-    }
-  }
-
-  // Google Sign-Up
-  Future<void> _signUpWithGoogle(BuildContext context) async {
-    final GoogleSignIn googleSignIn =
-        GoogleSignIn(signInOption: SignInOption.standard);
-    try {
-      await googleSignIn.signOut(); // Force account chooser every time
-      final GoogleSignInAccount? account = await googleSignIn.signIn();
-      if (account != null) {
-        final GoogleSignInAuthentication googleAuth =
-            await account.authentication;
-        final credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
-        );
-        await _auth.signInWithCredential(credential);
-        Navigator.pushReplacementNamed(
-            context, '/volunteer_document_dashboard'); // Redirect after signup
-      }
-    } catch (error) {
-      print('Google Sign-Up Error: $error');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Google Sign-Up Failed')),
+        SnackBar(content: Text("Error: ${data['message']}")),
       );
     }
   }
@@ -69,109 +58,74 @@ class VolunteerSignup extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Join as a Volunteer!',
+                const Text('Join as a Volunteer!',
                     style:
                         TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-                SizedBox(height: 10),
-                Text('Sign up to make a difference',
+                const SizedBox(height: 10),
+                const Text('Sign up to make a difference',
                     style: TextStyle(fontSize: 18, color: Colors.black54)),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
 
                 // Full Name
                 TextField(
-                  controller: fullNameController,
-                  decoration: InputDecoration(
-                      hintText: 'Full Name', border: OutlineInputBorder()),
-                ),
-                SizedBox(height: 20),
+                    controller: fullNameController,
+                    decoration: const InputDecoration(
+                        hintText: 'Full Name', border: OutlineInputBorder())),
+                const SizedBox(height: 20),
 
                 // Phone Number
                 TextField(
-                  controller: phoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                      hintText: 'Phone Number', border: OutlineInputBorder()),
-                ),
-                SizedBox(height: 20),
+                    controller: phoneController,
+                    keyboardType: TextInputType.phone,
+                    decoration: const InputDecoration(
+                        hintText: 'Phone Number',
+                        border: OutlineInputBorder())),
+                const SizedBox(height: 20),
 
                 // Address
                 TextField(
-                  controller: addressController,
-                  decoration: InputDecoration(
-                      hintText: 'Address', border: OutlineInputBorder()),
-                ),
-                SizedBox(height: 20),
+                    controller: addressController,
+                    decoration: const InputDecoration(
+                        hintText: 'Address', border: OutlineInputBorder())),
+                const SizedBox(height: 20),
 
                 // Email
                 TextField(
-                  controller: emailController,
-                  decoration: InputDecoration(
-                      hintText: 'Email', border: OutlineInputBorder()),
-                ),
-                SizedBox(height: 20),
+                    controller: emailController,
+                    decoration: const InputDecoration(
+                        hintText: 'Email', border: OutlineInputBorder())),
+                const SizedBox(height: 20),
 
                 // Password
                 TextField(
-                  controller: passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                      hintText: 'Password', border: OutlineInputBorder()),
-                ),
-                SizedBox(height: 20),
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                        hintText: 'Password', border: OutlineInputBorder())),
+                const SizedBox(height: 20),
 
                 // Sign Up Button
                 ElevatedButton(
-                  onPressed: () => _signUpWithEmail(context),
+                  onPressed: _isLoading ? null : _signUp,
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
-                      minimumSize: Size(double.infinity, 50)),
-                  child: Text('Sign Up'),
+                      minimumSize: const Size(double.infinity, 50)),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('Sign Up'),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-                // OR Divider
-                Row(
-                  children: [
-                    Expanded(child: Divider(thickness: 1)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child:
-                          Text('OR', style: TextStyle(color: Colors.black54)),
-                    ),
-                    Expanded(child: Divider(thickness: 1)),
-                  ],
-                ),
-                SizedBox(height: 20),
-
-                // Google Sign Up Button
-                ElevatedButton(
-                  onPressed: () => _signUpWithGoogle(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    minimumSize: Size(double.infinity, 50),
-                    side: BorderSide(color: Colors.grey),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset('assets/google_logo.png', height: 24),
-                      SizedBox(width: 10),
-                      Text('Sign Up with Google'),
-                    ],
-                  ),
-                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text('Already have an account?',
                         style: TextStyle(fontSize: 14)),
                     TextButton(
-                      onPressed: () =>
-                          Navigator.pushNamed(context, '/volunteerLogin'),
-                      child:
-                          const Text('Login', style: TextStyle(fontSize: 14)),
-                    ),
+                        onPressed: () =>
+                            Navigator.pushNamed(context, '/volunteerLogin'),
+                        child: const Text('Login',
+                            style: TextStyle(fontSize: 14))),
                   ],
                 )
               ],
