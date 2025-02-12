@@ -122,7 +122,7 @@ app.get('/api/donations', async (req, res) => {
 app.post('/api/donors', async (req, res) => {
   try {
     const { name, email, phone, location, organization, currentPassword } = req.body;
-    
+
     // Validate required fields
     if (!name || !email || !phone || !location || !organization || !currentPassword) {
       return res.status(400).json({ error: 'Missing required fields.' });
@@ -151,11 +151,51 @@ app.post('/api/donors', async (req, res) => {
   }
 });
 
+// Get donor profile by email
+app.get('/api/donors/profile', async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const donor = await Donor.findOne({ email });
+    if (!donor) {
+      return res.status(404).json({ error: 'Donor not found' });
+    }
+
+    res.json(donor);
+  } catch (error) {
+    console.error('Error fetching donor profile:', error);
+    res.status(500).json({ error: 'Error fetching donor profile' });
+  }
+});
+
+app.post('/getUserProfile', async (req, res) => {
+  const { token } = req.body; // Firebase token sent from Flutter
+  try {
+    // Verify Firebase token and get UID
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    const uid = decodedToken.uid;
+
+    // Retrieve user data from MongoDB
+    const user = await User.findOne({ uid });
+    if (user) {
+      res.json({ profileData: user.profileData });
+    } else {
+      res.status(404).json({ error: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to authenticate user' });
+  }
+});
+
 // New Recipient endpoints
 app.post('/api/recipients', async (req, res) => {
   try {
     const { name, email, phone, location, recipientId, currentPassword, about } = req.body;
-    
+
     // Validate required fields
     if (!name || !email || !phone || !location || !recipientId || !currentPassword || !about) {
       return res.status(400).json({ error: 'Missing required fields.' });

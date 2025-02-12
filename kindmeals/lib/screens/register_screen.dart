@@ -72,65 +72,175 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   // Register using email and password
   Future<void> _registerWithEmail(BuildContext context) async {
-    if (selectedRole == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a role (Donor, Recipient)')),
-      );
-      return;
-    }
-
-    if (passwordController.text.trim() != confirmPasswordController.text.trim()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match!')),
-      );
-      return;
-    }
-
-    try {
-      final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
-
-      User? user = userCredential.user;
-      if (user != null) {
-        // Prepare user data for MongoDB with role-specific fields
-        final userData = {
-          'name': nameController.text.trim(),
-          'email': emailController.text.trim(),
-          'phone': phoneController.text.trim(),
-          'location': addressController.text.trim(),
-          'currentPassword': passwordController.text.trim(),
-          // Include role-specific fields based on selection
-          if (selectedRole == 'donor') 'organization': organizationController.text.trim(),
-          if (selectedRole == 'recipient') ...{
-            'recipientId': recipientIdController.text.trim(),
-            'about': aboutController.text.trim(),
-          },
-        };
-
-        try {
-          final response = await ApiService.registerUser(userData, selectedRole!);
-          print('MongoDB Registration successful: ${response['message']}');
-
-          if (!user.emailVerified) {
-            await user.sendEmailVerification();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Verification email sent. Please verify your email.')),
-            );
-          }
-        } catch (mongoError) {
-          await user.delete();
-          throw Exception('Failed to save user data: $mongoError');
-        }
-      }
-    } catch (e) {
-      print('Registration Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
-    }
+  if (selectedRole == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please select a role (Donor, Recipient)')),
+    );
+    return;
   }
+
+  if (passwordController.text.trim() != confirmPasswordController.text.trim()) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Passwords do not match!')),
+    );
+    return;
+  }
+
+  try {
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(child: CircularProgressIndicator());
+      },
+    );
+
+    final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),
+    );
+
+    User? user = userCredential.user;
+    if (user != null) {
+      // Prepare user data for MongoDB with role-specific fields
+      final userData = {
+        'name': nameController.text.trim(),
+        'email': emailController.text.trim(),
+        'phone': phoneController.text.trim(),
+        'location': addressController.text.trim(),
+        'currentPassword': passwordController.text.trim(),
+        if (selectedRole == 'donor') 'organization': organizationController.text.trim(),
+        if (selectedRole == 'recipient') ...{
+          'recipientId': recipientIdController.text.trim(),
+          'about': aboutController.text.trim(),
+        },
+      };
+
+      try {
+        final response = await ApiService.registerUser(userData, selectedRole!);
+        print('MongoDB Registration successful: ${response['message']}');
+
+        // Close loading indicator
+        Navigator.pop(context);
+
+        if (!user.emailVerified) {
+          await user.sendEmailVerification();
+          
+          // Show success dialog
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Registration Successful'),
+                content: const Text('A verification email has been sent. Please verify your email to continue.'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close dialog
+                      // Navigate based on role
+                      if (selectedRole == 'donor') {
+                        Navigator.pushNamed(
+                          context, 
+                          '/donor_profile',
+                          arguments: {'email': emailController.text.trim()}
+                        );
+                      } else {
+                        Navigator.pushNamed(
+                          context, 
+                          '/recipient_profile',
+                          arguments: {'email': emailController.text.trim()}
+                        );
+                      }
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      } catch (mongoError) {
+        // Close loading indicator
+        Navigator.pop(context);
+        
+        await user.delete();
+        throw Exception('Failed to save user data: $mongoError');
+      }
+    }
+  } catch (e) {
+    // Close loading indicator if still showing
+    if (context.mounted) {
+      Navigator.pop(context);
+    }
+    
+    print('Registration Error: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: ${e.toString()}')),
+    );
+  }
+}
+
+  // Future<void> _registerWithEmail(BuildContext context) async {
+  //   if (selectedRole == null) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Please select a role (Donor, Recipient)')),
+  //     );
+  //     return;
+  //   }
+
+  //   if (passwordController.text.trim() != confirmPasswordController.text.trim()) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Passwords do not match!')),
+  //     );
+  //     return;
+  //   }
+
+  //   try {
+  //     final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+  //       email: emailController.text.trim(),
+  //       password: passwordController.text.trim(),
+  //     );
+
+  //     User? user = userCredential.user;
+  //     if (user != null) {
+  //       // Prepare user data for MongoDB with role-specific fields
+  //       final userData = {
+  //         'name': nameController.text.trim(),
+  //         'email': emailController.text.trim(),
+  //         'phone': phoneController.text.trim(),
+  //         'location': addressController.text.trim(),
+  //         'currentPassword': passwordController.text.trim(),
+  //         // Include role-specific fields based on selection
+  //         if (selectedRole == 'donor') 'organization': organizationController.text.trim(),
+  //         if (selectedRole == 'recipient') ...{
+  //           'recipientId': recipientIdController.text.trim(),
+  //           'about': aboutController.text.trim(),
+  //         },
+  //       };
+
+  //       try {
+  //         final response = await ApiService.registerUser(userData, selectedRole!);
+  //         print('MongoDB Registration successful: ${response['message']}');
+
+  //         if (!user.emailVerified) {
+  //           await user.sendEmailVerification();
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //             const SnackBar(content: Text('Verification email sent. Please verify your email.')),
+  //           );
+  //         }
+  //       } catch (mongoError) {
+  //         await user.delete();
+  //         throw Exception('Failed to save user data: $mongoError');
+  //       }
+  //     }
+  //   } catch (e) {
+  //     print('Registration Error: $e');
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Error: ${e.toString()}')),
+  //     );
+  //   }
+  // }
   // Check if email is verified
   Future<void> _checkEmailVerification() async {
     User? user = _auth.currentUser;
