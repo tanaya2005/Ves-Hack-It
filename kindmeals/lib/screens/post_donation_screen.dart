@@ -142,7 +142,7 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
         }
 
         var response = await dio.post(
-          'http://192.168.0.102:3000/api/donations',
+          'http://192.168.0.100:3000/api/donations',
           data: formData,
           options: Options(headers: {'Accept': 'application/json'}),
         );
@@ -189,16 +189,14 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 30)),
     );
-    if (pickedDate != null) {
-      await _selectTime();
-      if (_selectedTime != null) {
-        setState(() {
-          _expiryDateController.text =
-              '${pickedDate.day}/${pickedDate.month}/${pickedDate.year} ${_selectedTime!.format(context)}';
-        });
-      }
+    await _selectTime();
+    if (_selectedTime != null) {
+      setState(() {
+        _expiryDateController.text =
+            '${pickedDate?.day}/${pickedDate?.month}/${pickedDate?.year} ${_selectedTime!.format(context)}';
+      });
     }
-  }
+    }
 
   @override
   Widget build(BuildContext context) {

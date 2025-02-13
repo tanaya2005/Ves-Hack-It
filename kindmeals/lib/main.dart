@@ -57,7 +57,6 @@ class KindMealsApp extends StatelessWidget {
       routes: {
         '/welcome': (context) => WelcomeSplashScreen(),
         '/roleSelection': (context) => RoleSelection(),
-        // '/register_login': (context) => RegisterLoginPage(),
         '/login': (context) => LoginScreen(),
         '/forgotPassword': (context) => ForgotPasswordScreen(),
         '/register': (context) => RegisterScreen(),

@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'edit_recipient_profile.dart';
 import 'change_password_screen.dart';
 import 'login_screen.dart';
+import 'api_service.dart';
 
 class RecipientProfile extends StatefulWidget {
   const RecipientProfile({super.key});
@@ -11,23 +13,110 @@ class RecipientProfile extends StatefulWidget {
 }
 
 class _RecipientProfileState extends State<RecipientProfile> {
-  String name = 'Jane Smith';
-  String email = 'janesmith@recipient.com';
-  String phone = '9876543210';
-  String location = 'Hope Avenue, Charity City';
-  String recipientId = 'R123456';
-  String about = 'Committed to improving lives through your generosity.';
-  String currentPassword = 'password123';
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  String name = '';
+  String email = '';
+  String phone = '';
+  String location = '';
+  String recipientId = '';
+  String about = '';
+  String currentPassword = '';
+  bool isLoading = true;
+  String? error;
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch profile data after widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchRecipientProfile();
+    });
+  }
+
+  Future<void> _fetchRecipientProfile() async {
+    try {
+      // Get email from navigation arguments
+      final User? user = _auth.currentUser;
+
+      if (user == null) {
+        setState(() {
+          error = 'No user logged in';
+          isLoading = false;
+        });
+        return;
+      }
+
+      final response = await ApiService.getRecipientProfile(user.email!);
+
+      setState(() {
+        name = response['name'] ?? '';
+        email = response['email'] ?? '';
+        phone = response['phone'] ?? '';
+        location = response['location'] ?? '';
+        recipientId = response['recipientId'] ?? '';
+        about = response['about'] ?? '';
+        currentPassword = response['currentPassword'] ?? '';
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        error = 'Failed to load profile: $e';
+        isLoading = false;
+      });
+      print('Error fetching recipient profile: $e'); // Log error
+    }
+  }
+
+  Future<void> _handleLogout() async {
+    try {
+      await _auth.signOut();
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+          (route) => false, // This removes all previous routes
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error signing out: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recipient Profile'),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.green,
       ),
-      body: _buildProfileContent(context),
+      body: _buildBody(),
     );
+  }
+
+  Widget _buildBody() {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(error!, style: const TextStyle(color: Colors.red)),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _fetchRecipientProfile,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return _buildProfileContent(context);
   }
 
   Widget _buildProfileContent(BuildContext context) {
@@ -76,8 +165,8 @@ class _RecipientProfileState extends State<RecipientProfile> {
               final newPassword = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChangePasswordScreen(
-                      currentPassword: currentPassword),
+                  builder: (context) =>
+                      ChangePasswordScreen(currentPassword: currentPassword),
                 ),
               );
 
@@ -159,29 +248,29 @@ class _RecipientProfileState extends State<RecipientProfile> {
           title: const Text('Are you sure you want to log out?'),
           actions: [
             TextButton(
-              child: const Text('Cancel', style: TextStyle(color: Colors.black)),
+              child:
+                  const Text('Cancel', style: TextStyle(color: Colors.black)),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
                   color: Colors.red,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text(
                   'Yes',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()),
-                );
+                _handleLogout();
               },
             ),
           ],

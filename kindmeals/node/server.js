@@ -191,13 +191,13 @@ app.post('/getUserProfile', async (req, res) => {
   }
 });
 
-// New Recipient endpoints
+//New Recipient endpoints
 app.post('/api/recipients', async (req, res) => {
   try {
-    const { name, email, phone, location, recipientId, currentPassword, about } = req.body;
+    const { name, email, phone, location, recipientId, about, currentPassword } = req.body;
 
     // Validate required fields
-    if (!name || !email || !phone || !location || !recipientId || !currentPassword || !about) {
+    if (!name || !email || !phone || !location || !recipientId || !about || !currentPassword) {
       return res.status(400).json({ error: 'Missing required fields.' });
     }
 
@@ -213,8 +213,8 @@ app.post('/api/recipients', async (req, res) => {
       phone,
       location,
       recipientId,
-      currentPassword,
-      about
+      about,
+      currentPassword
     });
 
     await recipient.save();
@@ -224,6 +224,28 @@ app.post('/api/recipients', async (req, res) => {
     res.status(500).json({ error: 'Error registering recipient.' });
   }
 });
+
+// Get recipient profile by email
+app.get('/api/recipients/profile', async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const recipient = await Recipient.findOne({ email });
+    if (!recipient) {
+      return res.status(404).json({ error: 'Recipient not found' });
+    }
+
+    res.json(recipient);
+  } catch (error) {
+    console.error('Error fetching recipient profile:', error);
+    res.status(500).json({ error: 'Error fetching recipient profile' });
+  }
+});
+
 
 // Login endpoint for both donors and recipients
 app.post('/api/login', async (req, res) => {
