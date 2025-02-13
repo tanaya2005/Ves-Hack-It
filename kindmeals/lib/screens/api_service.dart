@@ -1,11 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-
-
 class ApiService {
-  static const String baseUrl =
-      'http://192.168.0.100:3000/api';
+  static const String baseUrl = 'http://192.168.0.100:3000/api';
   static Future<Map<String, dynamic>> registerUser(
       Map<String, dynamic> userData, String userType) async {
     try {
@@ -42,7 +39,7 @@ class ApiService {
       throw Exception('Profile fetch error: $e');
     }
   }
-  
+
   //New method to get recipient profile by email
   static Future<Map<String, dynamic>> getRecipientProfile(String email) async {
     try {
@@ -58,6 +55,31 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Profile fetch error: $e');
+    }
+  }
+
+  // In api_service.dart
+  static Future<Map<String, dynamic>> acceptDonation(
+      String donationId, bool needsVolunteer) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/donations/accept'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'donationId': donationId,
+          'needsVolunteer': needsVolunteer,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        return responseData;
+      } else {
+        final errorData = json.decode(response.body);
+        throw Exception(errorData['error'] ?? 'Failed to accept donation');
+      }
+    } catch (e) {
+      throw Exception('Error accepting donation: $e');
     }
   }
 

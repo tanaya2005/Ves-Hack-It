@@ -1,5 +1,4 @@
-// ignore_for_file: deprecated_member_use, library_private_types_in_public_api
-
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -14,7 +13,38 @@ class LiveDonationRequestsScreen extends StatefulWidget {
       _LiveDonationRequestsScreenState();
 }
 
-class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen> {
+class _LiveDonationRequestsScreenState
+    extends State<LiveDonationRequestsScreen> {
+  List<Map<String, dynamic>> _donationRequests = [];
+  Position? _currentPosition;
+  bool _isLoading = true;
+  String? _errorMessage;
+  Timer? _refreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    await _getCurrentLocation();
+    await _fetchDonationRequests();
+
+    // Set up periodic refresh every minute
+    _refreshTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      if (mounted) {
+        _fetchDonationRequests();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
   String _getReadableDistance(double distance) {
     if (distance < 1000) {
       return '${distance.toStringAsFixed(0)} m';
@@ -23,29 +53,15 @@ class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen>
     }
   }
 
-  String _getLocationDisplay(Map<String, dynamic> request, double? calculatedDistance) {
+  String _getLocationDisplay(
+      Map<String, dynamic> request, double? calculatedDistance) {
     String display = request['location'] ?? 'Location not specified';
-    
-    if (calculatedDistance != null && 
-        double.tryParse(request['latitude'] ?? '') != null && 
+    if (calculatedDistance != null &&
+        double.tryParse(request['latitude'] ?? '') != null &&
         double.tryParse(request['longitude'] ?? '') != null) {
       display += ' • ${_getReadableDistance(calculatedDistance)}';
     }
-    
     return display;
-  }
-
-  List<Map<String, dynamic>> _donationRequests = [];
-  Position? _currentPosition;
-  bool _isLoading = true;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _getCurrentLocation().then((_) {
-      _fetchDonationRequests();
-    });
   }
 
   Future<void> _fetchDonationRequests() async {
@@ -59,6 +75,7 @@ class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen>
         setState(() {
           _donationRequests = data.map((item) {
             return {
+              'id': item['_id'] ?? '',
               'foodName': item['foodName'] ?? 'Unknown Food',
               'quantity': '${item['quantity'] ?? 0} ',
               'expiryDate': item['expiryDate'] ?? 'Unknown',
@@ -71,12 +88,17 @@ class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen>
               'donorVerification': item['donorVerification'] ?? 'Unverified',
               'latitude': item['latitude']?.toString() ?? '0.0',
               'longitude': item['longitude']?.toString() ?? '0.0',
+              'status': item['status'] ?? 'available',
+              'acceptedBy': item['acceptedBy'],
+              'needsVolunteer': item['needsVolunteer'] ?? false,
             };
           }).toList();
+          _sortByDistance();
         });
       } else {
         setState(() {
-          _errorMessage = 'Failed to load donations: ${response.statusCode} - ${response.body}';
+          _errorMessage =
+              'Failed to load donations: ${response.statusCode} - ${response.body}';
         });
       }
     } catch (e, stackTrace) {
@@ -117,7 +139,8 @@ class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen>
       if (permission == LocationPermission.deniedForever) {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Location permissions are permanently denied. Please enable them from settings.';
+          _errorMessage =
+              'Location permissions are permanently denied. Please enable them from settings.';
         });
         return;
       }
@@ -155,8 +178,46 @@ class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen>
     }
   }
 
-  double _calculateDistance(double startLat, double startLon, double endLat, double endLon) {
+  double _calculateDistance(
+      double startLat, double startLon, double endLat, double endLon) {
     return Geolocator.distanceBetween(startLat, startLon, endLat, endLon);
+  }
+
+  List<Map<String, dynamic>> get _availableDonations {
+    return _donationRequests
+        .where((request) => request['status'] == 'available')
+        .toList();
+  }
+
+  Future<void> _handleDonationAccepted(String donationId) async {
+    try {
+      // Remove the donation from the local list
+      setState(() {
+        _donationRequests.removeWhere((request) => request['id'] == donationId);
+      });
+
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Donation successfully accepted!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+
+      // Refresh the list to get updated data
+      await _fetchDonationRequests();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _viewItem(Map<String, dynamic> request) {
@@ -164,7 +225,10 @@ class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen>
       context,
       MaterialPageRoute(
         builder: (context) => ItemDetailScreen(
-          request: request.map((key, value) => MapEntry(key, value.toString())),
+          request: Map<String, String>.from(request.map(
+            (key, value) => MapEntry(key, value.toString()),
+          )),
+          onDonationAccepted: _handleDonationAccepted,
         ),
       ),
     );
@@ -198,7 +262,95 @@ class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen>
               label: const Text('Retry'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDonationCard(Map<String, dynamic> request, double? distance) {
+    return Card(
+      elevation: 5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                request['image']!,
+                width: double.infinity,
+                height: 200,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: double.infinity,
+                    height: 200,
+                    color: Colors.grey[300],
+                    child: const Icon(
+                      Icons.image_not_supported,
+                      size: 50,
+                      color: Colors.grey,
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              request['foodName']!,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text('Quantity: ${request['quantity']}'),
+            const SizedBox(height: 8),
+            Text('Expiry Date: ${request['expiryDate']}'),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(
+                  Icons.location_on,
+                  color: Colors.green,
+                  size: 18,
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    _getLocationDisplay(request, distance),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text('Donor: ${request['donorName']}'),
+            const SizedBox(height: 16),
+            Center(
+              child: ElevatedButton(
+                onPressed: () => _viewItem(request),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  minimumSize: const Size(double.infinity, 60),
+                ),
+                child: const Text(
+                  'View Item',
+                  style: TextStyle(fontSize: 18),
+                ),
               ),
             ),
           ],
@@ -236,107 +388,34 @@ class _LiveDonationRequestsScreenState extends State<LiveDonationRequestsScreen>
                     await _getCurrentLocation();
                     await _fetchDonationRequests();
                   },
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: _donationRequests.map((request) {
-                        double? distance = _currentPosition != null
-                            ? _calculateDistance(
-                                _currentPosition!.latitude,
-                                _currentPosition!.longitude,
-                                double.tryParse(request['latitude'] ?? '0.0') ?? 0.0,
-                                double.tryParse(request['longitude'] ?? '0.0') ?? 0.0,
-                              )
-                            : null;
-
-                        return Card(
-                          elevation: 5,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
+                  child: _availableDonations.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No available donations at the moment',
+                            style: TextStyle(fontSize: 16),
                           ),
-                          margin: const EdgeInsets.only(bottom: 16),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    request['image']!,
-                                    width: double.infinity,
-                                    height: 200,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Container(
-                                        width: double.infinity,
-                                        height: 200,
-                                        color: Colors.grey[300],
-                                        child: const Icon(
-                                          Icons.image_not_supported,
-                                          size: 50,
-                                          color: Colors.grey,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  request['foodName']!,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text('Quantity: ${request['quantity']}'),
-                                const SizedBox(height: 8),
-                                Text('Expiry Date: ${request['expiryDate']}'),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.location_on,
-                                      color: Colors.green,
-                                      size: 18,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Expanded(
-                                      child: Text(
-                                        _getLocationDisplay(request, distance),
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Text('Donor: ${request['donorName']}'),
-                                const SizedBox(height: 16),
-                                Center(
-                                  child: ElevatedButton(
-                                    onPressed: () => _viewItem(request),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.green,
-                                      minimumSize: const Size(double.infinity, 60),
-                                    ),
-                                    child: const Text(
-                                      'View Item',
-                                      style: TextStyle(fontSize: 18),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                        )
+                      : SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            children: _availableDonations.map((request) {
+                              double? distance = _currentPosition != null
+                                  ? _calculateDistance(
+                                      _currentPosition!.latitude,
+                                      _currentPosition!.longitude,
+                                      double.tryParse(
+                                              request['latitude'] ?? '0.0') ??
+                                          0.0,
+                                      double.tryParse(
+                                              request['longitude'] ?? '0.0') ??
+                                          0.0,
+                                    )
+                                  : null;
+                              return _buildDonationCard(request, distance);
+                            }).toList(),
                           ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
+                        ),
                 ),
     );
   }

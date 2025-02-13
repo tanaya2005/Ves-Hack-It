@@ -44,8 +44,82 @@ const donationSchema = new mongoose.Schema({
   latitude: { type: Number },
   longitude: { type: Number },
   createdAt: { type: Date, default: Date.now },
+
+  status: {
+    type: String,
+    enum: ['available', 'accepted', 'completed'],
+    default: 'available'
+  },
+  acceptedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Recipient',
+    default: null
+  },
+  needsVolunteer: {
+    type: Boolean,
+    default: false
+  },
+  acceptedAt: {
+    type: Date,
+    default: null
+  }
 });
 
+//Add the acceptance endpoint
+app.post('/api/donations/accept', async (req, res) => {
+  try {
+    const { donationId, needsVolunteer } = req.body;
+
+    // Validate required fields
+    if (!donationId) {
+      return res.status(400).json({ 
+        error: 'donationId are required.' 
+      });
+    }
+
+    // Find the donation and recipient in parallel for better performance
+    const [donation] = await Promise.all([
+      Donation.findById(donationId),
+    ]);
+
+    // Validate donation exists
+    if (!donation) {
+      return res.status(404).json({ error: 'Donation not found.' });
+    }
+
+    // Check donation availability
+    if (donation.status !== 'available') {
+      return res.status(400).json({ 
+        error: 'Donation is no longer available.',
+        currentStatus: donation.status 
+      });
+    }
+
+    // Update donation
+    donation.status = 'accepted';
+    donation.needsVolunteer = needsVolunteer;
+    donation.acceptedAt = new Date();
+
+    await donation.save();
+
+    // Return success with updated donation
+    res.status(200).json({
+      message: 'Donation accepted successfully!',
+      donation: {
+        id: donation._id,
+        status: donation.status,
+        acceptedAt: donation.acceptedAt,
+        needsVolunteer: donation.needsVolunteer
+      }
+    });
+  } catch (error) {
+    console.error('Error accepting donation:', error);
+    res.status(500).json({ 
+      error: 'Server error while accepting donation.',
+      details: error.message 
+    });
+  }
+});
 const Donation = mongoose.model('Donation', donationSchema);
 
 // Donor Schema
