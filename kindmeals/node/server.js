@@ -1,84 +1,132 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const multer = require('multer');
-const path = require('path');
+const admin = require('firebase-admin');
 
 const app = express();
+
+// 🔹 Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static('uploads'));
 
-// Configure multer for file upload
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
+// 🔹 Initialize Firebase Admin SDK (Replace with your own Service Account Key)
+const serviceAccount = require("./serviceAccountKey.json"); // Make sure this file is in the same directory as server.js
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
 });
 
-const upload = multer({ storage: storage });
+// 🔹 MongoDB Connection (Replace with your actual MongoDB URI)
+const mongoURI = 'mongodb+srv://tanaya:mongotan@cluster0.9e5vj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 
-// MongoDB connection
-mongoose.connect('mongodb+srv://tanaya:mongotan@cluster0.9e5vj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
+mongoose.connect(mongoURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB Connected'))
-.catch(err => console.log(err));
-
-// Donation Schema
-const donationSchema = new mongoose.Schema({
-  foodName: String,
-  quantity: Number,
-  description: String,
-  expiryDate: String, // Ensure this is included
-  isVeg: Boolean,
-  isNonVeg: Boolean,
-  imageUrl: String,
-  createdAt: { type: Date, default: Date.now }
 });
 
-const Donation = mongoose.model('Donation', donationSchema);
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.once('open', () => console.log('✅ Connected to MongoDB'));
 
-// Create uploads directory if it doesn't exist
-const fs = require('fs');
-if (!fs.existsSync('uploads')) {
-  fs.mkdirSync('uploads');
-}
+// 🔹 Define Volunteer Schema
+const volunteerSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true }, // Firebase id
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  phone: { type: String, required: true },
+  address: { type: String, required: true },
+  availableDays: { type: [String], required: true },
+  createdAt: { type: Date, default: Date.now },
+});
 
-// Handle donation post with file upload
-app.post('/api/donations', upload.single('image'), async (req, res) => {
+const Volunteer = mongoose.model('Volunteer', volunteerSchema);
+
+// 🔹 Register a Volunteer
+app.post('/api/volunteers/register', async (req, res) => {
   try {
-    const donationData = {
-      foodName: req.body.foodName,
-      quantity: parseInt(req.body.quantity),
-      description: req.body.description,
-      expiryDate: req.body.expiryDate, // Ensure this is included
-      isVeg: req.body.isVeg === 'true',
-      isNonVeg: req.body.isNonVeg === 'true',
-      imageUrl: req.file ? `/uploads/${req.file.filename}` : null
-    };
+    const { id, name, email, phone, address, availableDays } = req.body;
 
-    const donation = new Donation(donationData);
-    await donation.save();
-    res.status(201).json({ message: 'Donation saved successfully!', donation });
+    // Check if volunteer already exists
+    let volunteer = await Volunteer.findOne({ id: id });
+    if (volunteer) {
+      return res.status(400).json({ message: 'Volunteer already exists' });
+    }
+
+    // Save new volunteer in MongoDB
+    volunteer = new Volunteer({ id: id, name, email, phone, address, availableDays });
+    await volunteer.save();
+
+    res.status(201).json({ message: 'Volunteer registered successfully', volunteer });
   } catch (error) {
-    console.error('Error saving donation:', error);
-    res.status(400).json({ error: 'Error saving donation.' });
+    res.status(500).json({ message: error.message });
   }
 });
 
-// Get all donations
-app.get('/api/donations', async (req, res) => {
+// 🔹 Login with Firebase Authentication (Token Verification)
+app.post('/api/volunteers/login', async (req, res) => {
   try {
-    const donations = await Donation.find().sort({ createdAt: -1 });
-    res.json(donations);
+    const { token } = req.body;
+
+    // Verify Firebase token
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    const id = decodedToken.id;
+
+    // Check if user exists
+    const volunteer = await Volunteer.findOne({ id: id });
+    if (!volunteer) {
+      return res.status(404).json({ message: 'Volunteer not found' });
+    }
+
+    res.json({ message: 'Login successful', volunteer });
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching donations.' });
+    res.status(401).json({ message: 'Unauthorized - Invalid token' });
   }
 });
 
-app.listen(3000, () => console.log('Server running on http://localhost:3000'));
+// 🔹 Get All Volunteers
+app.get('/api/volunteers', async (req, res) => {
+  try {
+    const volunteers = await Volunteer.find();
+    res.json(volunteers);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// 🔹 Get Volunteer by ID
+app.get('/api/volunteers/:id', async (req, res) => {
+  try {
+    const volunteer = await Volunteer.findOne({ id: req.params.id });
+    if (!volunteer) return res.status(404).json({ message: 'Volunteer not found' });
+    res.json(volunteer);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// 🔹 Update Volunteer Data
+app.patch('/api/volunteers/:id', async (req, res) => {
+  try {
+    const updatedVolunteer = await Volunteer.findOneAndUpdate(
+      { id: req.params.id },
+      req.body,
+      { new: true }
+    );
+    res.json(updatedVolunteer);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// 🔹 Delete Volunteer
+app.delete('/api/volunteers/:id', async (req, res) => {
+  try {
+    await Volunteer.findOneAndDelete({ id: req.params.id });
+    res.json({ message: 'Volunteer deleted' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// 🔹 Start Server
+const PORT = 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

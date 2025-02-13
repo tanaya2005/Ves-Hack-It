@@ -1,8 +1,9 @@
-// ignore_for_file: use_build_context_synchronously, avoid_print
-
+// lib/screens/volunteer_signup.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:kindmeals/models/volunteer.dart';
+import '../services/api_service.dart';
 
 class VolunteerSignup extends StatelessWidget {
   final TextEditingController fullNameController = TextEditingController();
@@ -14,16 +15,47 @@ class VolunteerSignup extends StatelessWidget {
   VolunteerSignup({super.key});
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final ApiService _apiService = ApiService();
+
+  // Save volunteer data to MongoDB
+  Future<void> _saveVolunteerData(BuildContext context, String uid) async {
+  try {
+    final volunteer = {
+      'id': uid,
+      'name': fullNameController.text.trim(),
+      'email': emailController.text.trim(),
+      'phone': phoneController.text.trim(),
+      'address': addressController.text.trim(),
+      'availableDays': [] // Add this even if empty
+    };
+
+    print('Volunteer data: $volunteer'); // Debug print
+    
+    await _apiService.registerVolunteer(volunteer);
+    
+    // Navigate only after successful save
+    Navigator.pushReplacementNamed(context, '/volunteer_document_dashboard');
+  } catch (e) {
+    print('Error saving volunteer data: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error saving volunteer data: ${e.toString()}')),
+    );
+  }
+}
 
   // Email/Password Sign-Up
   Future<void> _signUpWithEmail(BuildContext context) async {
     try {
-      await _auth.createUserWithEmailAndPassword(
+      final UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
-      Navigator.pushReplacementNamed(
-          context, '/volunteer_document_dashboard'); // Redirect after signup
+
+      // Save volunteer data after successful authentication
+      if (userCredential.user != null) {
+        await _saveVolunteerData(context, userCredential.user!.uid);
+      }
     } catch (e) {
       print('Email Sign-Up Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -37,7 +69,7 @@ class VolunteerSignup extends StatelessWidget {
     final GoogleSignIn googleSignIn =
         GoogleSignIn(signInOption: SignInOption.standard);
     try {
-      await googleSignIn.signOut(); // Force account chooser every time
+      await googleSignIn.signOut();
       final GoogleSignInAccount? account = await googleSignIn.signIn();
       if (account != null) {
         final GoogleSignInAuthentication googleAuth =
@@ -46,9 +78,16 @@ class VolunteerSignup extends StatelessWidget {
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
-        await _auth.signInWithCredential(credential);
-        Navigator.pushReplacementNamed(
-            context, '/volunteer_document_dashboard'); // Redirect after signup
+        final UserCredential userCredential =
+            await _auth.signInWithCredential(credential);
+
+        // Pre-fill email field with Google account email
+        emailController.text = account.email;
+
+        // If user exists, save volunteer data
+        if (userCredential.user != null) {
+          await _saveVolunteerData(context, userCredential.user!.uid);
+        }
       }
     } catch (error) {
       print('Google Sign-Up Error: $error');
@@ -56,6 +95,18 @@ class VolunteerSignup extends StatelessWidget {
         SnackBar(content: Text('Google Sign-Up Failed')),
       );
     }
+  }
+
+  // Form validation
+  bool _validateForm() {
+    return fullNameController.text.isNotEmpty &&
+        phoneController.text.isNotEmpty &&
+        addressController.text.isNotEmpty &&
+        emailController.text.isNotEmpty &&
+        (passwordController.text.isNotEmpty ||
+            _auth.currentUser?.providerData
+                    .any((element) => element.providerId == 'google.com') ==
+                true);
   }
 
   @override
@@ -121,7 +172,15 @@ class VolunteerSignup extends StatelessWidget {
 
                 // Sign Up Button
                 ElevatedButton(
-                  onPressed: () => _signUpWithEmail(context),
+                  onPressed: () {
+                    if (_validateForm()) {
+                      _signUpWithEmail(context);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Please fill in all fields')),
+                      );
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       minimumSize: Size(double.infinity, 50)),

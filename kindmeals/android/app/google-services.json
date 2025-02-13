@@ -37,6 +37,13 @@
             {
               "client_id": "890474310680-8cig7d11g6cfk0vkoi8hl17tu1u0rf3b.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "890474310680-58p8j81j8eso2ricjv8e3oqavgugl14s.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.kindmeals"
+              }
             }
           ]
         }

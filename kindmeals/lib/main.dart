@@ -20,17 +20,20 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'theme.dart';
 import 'screens/welcome_splash.dart';
 import 'screens/register_login.dart';
-import 'screens/login_screen.dart';
+// import 'screens/login_screen.dart';
 import 'screens/forgot_password.dart';
 import 'screens/role_selection.dart';
 import 'screens/chat_screen.dart';
 import 'screens/dashboard.dart';
 import 'screens/volunteer_profile_screen.dart';
+// import 'package:firebase_app_check/firebase_app_check.dart';
 
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp(
+      // await FirebaseAppCheck.instance.activate();
+
       options: DefaultFirebaseOptions.currentPlatform,
     );
     runApp(const KindMealsApp());
@@ -225,6 +228,52 @@ class LogoutButton extends StatelessWidget {
         Navigator.pushReplacementNamed(context, '/registerLogin');
       },
       child: Text('Log Out'),
+    );
+  }
+}
+
+class LoginScreen extends StatefulWidget {
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  Future<void> login() async {
+    try {
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+      User? user = userCredential.user;
+      if (user != null) {
+        print("User signed in: ${user.uid}");
+      }
+      Navigator.pushReplacementNamed(context, "/volunteerProfile");
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Login Failed: ${e.toString()}")));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          TextField(
+              controller: emailController,
+              decoration: InputDecoration(labelText: "Email")),
+          TextField(
+              controller: passwordController,
+              decoration: InputDecoration(labelText: "Password"),
+              obscureText: true),
+          ElevatedButton(onPressed: login, child: Text("Login")),
+        ],
+      ),
     );
   }
 }

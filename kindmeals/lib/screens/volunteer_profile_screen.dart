@@ -173,6 +173,6 @@ class VolunteerProfileScreen extends StatelessWidget {
   }
 
   void _logout(BuildContext context) {
-    Navigator.pushReplacementNamed(context, '/registerLogin');
+    Navigator.pushReplacementNamed(context, '/volunteerLogin');
   }
 }
