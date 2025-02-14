@@ -48,6 +48,7 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage> {
             const SizedBox(height: 10),
             TextField(
               controller: vehicleNumberController,
+              maxLength: 10,
               decoration: const InputDecoration(labelText: 'Vehicle Number', border: OutlineInputBorder()),
             ),
             const SizedBox(height: 20),

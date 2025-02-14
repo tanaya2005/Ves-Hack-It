@@ -26,7 +26,6 @@ class VolunteerSignup extends StatelessWidget {
         'email': emailController.text.trim(),
         'phone': phoneController.text.trim(),
         'address': addressController.text.trim(),
-        'availableDays': [] // Add this even if empty
       };
 
       print('Volunteer data: $volunteer'); // Debug print
@@ -140,6 +139,7 @@ class VolunteerSignup extends StatelessWidget {
                 TextField(
                   controller: phoneController,
                   keyboardType: TextInputType.phone,
+                  maxLength: 10,
                   decoration: InputDecoration(
                       hintText: 'Phone Number', border: OutlineInputBorder()),
                 ),

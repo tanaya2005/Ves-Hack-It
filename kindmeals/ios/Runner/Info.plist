@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app needs access to location when open to show nearby pickup/delivery points.</string>
+    <key>io.flutter.embedded_views_preview</key>
+    <true/>
+    <key>GMSAPIKey</key>
+    <string>AIzaSyDy7J7gB21GN0JCRoA0pxd2XLjKgB1s1L0</string>
 </dict>
 </plist>

@@ -119,7 +119,7 @@ class VolunteerProfileScreen extends StatelessWidget {
               icon: Icons.list,
               label: "Orders",
               onPressed: () {
-                Navigator.pushReplacementNamed(context, '/ordersPage');
+                Navigator.pushReplacementNamed(context, '/volunteerOrdersPage');
               },
             ),
             _bottomNavButton(

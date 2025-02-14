@@ -80,6 +80,7 @@ class BankAccountDetailsPageState extends State<BankAccountDetailsPage> {
               const SizedBox(height: 10),
               TextFormField(
                 controller: ifscCodeController,
+                maxLength: 11,
                 decoration: const InputDecoration(
                   labelText: 'IFSC Code',
                   border: OutlineInputBorder(),

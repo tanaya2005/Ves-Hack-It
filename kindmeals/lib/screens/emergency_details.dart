@@ -61,6 +61,7 @@ class EmergencyDetailsPageState extends State<EmergencyDetailsPage> {
             TextField(
               controller: emergencyContact1Controller,
               keyboardType: TextInputType.phone,
+              maxLength: 10,
               decoration: const InputDecoration(
                 labelText: 'Emergency Contact 1',
                 border: OutlineInputBorder(),
@@ -70,6 +71,7 @@ class EmergencyDetailsPageState extends State<EmergencyDetailsPage> {
             TextField(
               controller: emergencyContact2Controller,
               keyboardType: TextInputType.phone,
+              maxLength: 10,
               decoration: const InputDecoration(
                 labelText: 'Emergency Contact 2',
                 border: OutlineInputBorder(),

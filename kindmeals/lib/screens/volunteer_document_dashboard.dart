@@ -46,7 +46,7 @@ class VolunteerDocumentDashboardState
   void checkCompletion() {
     if (completedDocuments.values.every((status) => status == true)) {
       // Navigate to Profile Screen when all are completed
-      Navigator.pushReplacementNamed(context, "/profileScreen");
+      Navigator.pushReplacementNamed(context, "/volunteerprofileScreen");
     } else {
       // Show error if not all documents are completed
       ScaffoldMessenger.of(context).showSnackBar(

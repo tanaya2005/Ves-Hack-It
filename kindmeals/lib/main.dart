@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
+import 'screens/volunteer_orders_screen.dart';
 import 'theme.dart';
 import 'screens/welcome_splash.dart';
 import 'screens/register_login.dart';
@@ -79,7 +80,7 @@ class KindMealsApp extends StatelessWidget {
                 onMessageSent: (String message) {},
               ),
           '/volunteer_dashboard': (context) => VolunteerScreen(),
-          '/profileScreen': (context) => const VolunteerProfileScreen(),
+          '/volunteerprofileScreen': (context) => const VolunteerProfileScreen(),
           '/volunteer_document_dashboard': (context) =>
               VolunteerDocumentDashboard(),
           '/volunteerLogin': (context) => VolunteerLoginPage(),
@@ -142,6 +143,7 @@ class KindMealsApp extends StatelessWidget {
                   }
                 },
               ),
+          '/volunteerOrdersPage': (context) => VolunteerOrdersScreen(),
         });
   }
 
