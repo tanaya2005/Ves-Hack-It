@@ -1,0 +1,147 @@
+/* Help Page Container */
+.help-container {
+    max-width: 900px;
+    margin: 35px auto;
+    padding: 30px;
+    background: #fff8e1;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border: 2px solid #f5b041;
+    transition: transform 0.2s ease-in-out;
+}
+
+.help-container:hover {
+    transform: scale(1.02);
+}
+
+/* Section Headings */
+h2, h3 {
+    color: #d35400;
+    font-weight: bold;
+}
+
+/* FAQ Section */
+.faq-section {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.faq-item {
+    background: white;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.faq-item:hover {
+    transform: scale(1.03);
+}
+
+.faq-question {
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #333;
+}
+
+.faq-icon {
+    transition: transform 0.3s ease-in-out;
+}
+
+.faq-icon.open {
+    transform: rotate(180deg);
+}
+
+.faq-answer {
+    margin-top: 10px;
+    color: #666;
+    font-size: 15px;
+}
+
+/* Contact Support Section */
+.contact-support {
+    margin-top: 30px;
+    padding: 20px;
+    background: #fef5e7;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.contact-link {
+    color: #d35400;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.contact-link:hover {
+    text-decoration: underline;
+    color: #e67e22;
+}
+
+/* Feedback Section */
+.feedback-section {
+    margin-top: 30px;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+
+.feedback-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.feedback-form textarea {
+    width: 100%;
+    max-width: 600px;
+    height: 100px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    resize: none;
+}
+
+.feedback-form button {
+    margin-top: 10px;
+    padding: 10px 15px;
+    background: #f39c12;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.feedback-form button:hover {
+    background: #e67e22;
+    transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 500px) {
+    .faq-question {
+        font-size: 14px;
+    }
+
+    .faq-answer {
+        font-size: 13px;
+    }
+
+    .feedback-form textarea {
+        width: 90%;
+    }
+
+    .feedback-form button {
+        font-size: 14px;
+    }
+}

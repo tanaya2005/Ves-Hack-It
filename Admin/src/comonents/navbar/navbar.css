@@ -1,0 +1,103 @@
+/* Navbar container */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c3e50;
+  padding: 15px 20px;
+  color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Left Side: Logo + Sidebar Toggle */
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-logo {
+  width: 40px; /* Adjust logo size */
+  height: auto;
+  margin-right: 10px;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  margin-right: 15px;
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* Right Side: Notification, Quick Access, Profile */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.notification-icon {
+  cursor: pointer;
+  color: white;
+}
+
+.quick-access-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.quick-access-btn:hover {
+  background: #2980b9;
+}
+
+/* Profile */
+.profile {
+  display: flex;
+  align-items: center;
+}
+
+.profile-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .quick-access-btn {
+      font-size: 14px;
+      padding: 6px 10px;
+  }
+}
+
+.quick-access-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.quick-access-btn:hover {
+  background: #2980b9;
+}
+
+.quick-access-icon {
+  color: white;
+}

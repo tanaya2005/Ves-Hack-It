@@ -1,0 +1,49 @@
+/* Social Media Section */
+.social-media-section {
+    text-align: center;
+    margin-top: 60px;
+    padding: 30px;
+}
+
+.social-media-section h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.social-media-section p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* Social Media Icons */
+.social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.social-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    font-size: 22px;
+    color: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-decoration: none;
+}
+
+.facebook { background: #3b5998; }
+.twitter { background: #1DA1F2; }
+.instagram { background: linear-gradient(135deg, #F58529, #DD2A7B, #8134AF); }
+.linkedin { background: #0077b5; }
+
+.social-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+

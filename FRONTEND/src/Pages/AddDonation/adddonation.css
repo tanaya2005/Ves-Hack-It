@@ -1,0 +1,179 @@
+/* src/components/AddDonation.css */
+.donation-form-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  justify-content: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(to right, #f9f9f9, #ffffff);
+  border: 2px solid #ddd;
+}
+
+p {
+  font-size: 1rem;
+  text-align: center;
+  font-weight: 500;
+  color: #444;
+  /* background: rgba(76, 175, 80, 0.1); */
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+label {
+  display: block;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+/* Enhancing input fields */
+input[type="text"],
+input[type="datetime-local"],
+textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #f7f7f7;
+  transition: all 0.3s ease;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #4CAF50;
+  background: white;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+  outline: none;
+}
+
+/* Styling textarea */
+textarea {
+  height: 120px;
+  resize: vertical;
+}
+
+/* Styling for radio buttons */
+.radio-group {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  background: rgba(76, 175, 80, 0.1);
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #444;
+  cursor: pointer;
+}
+
+input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 5px;
+}
+
+/* Image Upload Styling */
+.image-preview-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #fafafa;
+  padding: 1rem;
+  border: 2px dashed #bbb;
+  border-radius: 6px;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-top: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Button Styling */
+button {
+  display: block;
+  width: 100%;
+  padding: 0.8rem;
+  background: #4CAF50;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  margin-top: 1rem;
+}
+
+button:hover {
+  background: #388E3C;
+  transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .donation-form-container {
+      margin: 1rem;
+      padding: 1rem;
+  }
+
+  button {
+      width: 100%;
+  }
+}
+
+.location-btn {
+  display: block;
+  width: 100%;
+  padding: 0.8rem;
+  background: #ff9800;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  margin-top: 0.5rem;
+}
+
+.location-btn:hover {
+  background: #f57c00;
+  transform: translateY(-2px);
+}
+
+.location-text {
+  font-size: 0.9rem;
+  color: #333;
+  font-weight: bold;
+  margin-top: 0.5rem;
+  text-align: center;
+}

@@ -1,0 +1,132 @@
+/* General Page Styling */
+.previous-contributions {
+    text-align: center;
+    padding: 25px;
+    font-family: "Poppins", sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Page Title */
+.previous-contributions h2 {
+    font-size: 24px;
+    color: #222;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+/* Page Description */
+.previous-contributions p {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+/* Contribution Cards Container */
+.contributions-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 10px;
+}
+
+/* Individual Contribution Card */
+.contribution-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    width: 300px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid #e0e0e0;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.contribution-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+}
+
+/* Contribution Image */
+.contribution-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* Contribution Details */
+.contribution-details {
+    text-align: left;
+    width: 100%;
+    padding: 12px 0;
+    flex-grow: 1; /* Allows details to take up remaining space */
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.contribution-details h3 {
+    color: #17a2b8; /* Different color for differentiation */
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.contribution-details p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.5;
+}
+
+.feedback {
+    font-style: italic;
+    color: #666;
+}
+
+/* No Contributions Found */
+.no-contributions {
+    font-size: 16px;
+    color: red;
+    font-weight: bold;
+    margin-top: 12px;
+}
+
+/* Action Buttons */
+.contribution-actions {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+    margin-top: auto; /* Pushes buttons to the bottom */
+}
+
+.details-btn, .feedback-btn {
+    border: none;
+    padding: 8px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.details-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+.details-btn:hover {
+    background-color: #0056b3;
+}
+
+.feedback-btn {
+    background-color: #ffc107;
+    color: black;
+}
+
+.feedback-btn:hover {
+    background-color: #d39e00;
+}

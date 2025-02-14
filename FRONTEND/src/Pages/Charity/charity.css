@@ -1,0 +1,104 @@
+.charity {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding-top: 80px; /* Added padding to prevent overlap with navbar */
+    background: url('../../assets/charity-bg.jpg') no-repeat center center/cover;
+}
+
+.charity-container {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    max-width: 500px;
+    width: 90%;
+}
+
+h1 {
+    color: #E53935;
+}
+
+p {
+    font-size: 16px;
+    color: #444;
+}
+
+/* Donation Amount Buttons */
+.donation-amounts {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.donation-amounts button {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    background: #E53935;
+    color: white;
+    transition: 0.3s;
+}
+
+.donation-amounts button:hover {
+    background: #D32F2F;
+}
+
+/* Custom Amount Input */
+.custom-amount {
+    display: block;
+    width: 80%;
+    margin: 10px auto;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: center;
+}
+
+/* Impact Section */
+.impact-section {
+    margin-top: 20px;
+    background: #F5F5F5;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.impact-section h2 {
+    color: #E53935;
+    margin-bottom: 10px;
+}
+
+/* Payment Methods */
+.payment-method {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.payment-method label {
+    font-size: 16px;
+}
+
+/* Donate Button */
+.donate-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.donate-btn:hover {
+    background: #388E3C;
+}

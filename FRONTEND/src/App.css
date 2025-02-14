@@ -1,0 +1,11 @@
+.chat{
+    position: fixed;
+    right: 15px;
+    bottom: 15px;
+}
+.app{
+    overflow-x:visible;
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins'; /* Ensure proper font-family usage */
+}

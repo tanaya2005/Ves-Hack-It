@@ -1,0 +1,122 @@
+Main Layout
+.volunteer-recipient-section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 50px;
+}
+
+/* Container for each section */
+.volunteer-content, 
+.recipient-content {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+/* Common Box Styles */
+.leaderboard-quote, 
+.leaderboard-preview,
+.meet-volunteers,
+.impact-quote, 
+.recent-recipients,
+.meet-recipients {
+    background: #f8f8f8;
+    color: black;
+    padding: 25px;
+    border-radius: 15px;
+    text-align: center;
+    width: 420px;
+    min-height: 320px;
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.25);
+    font-family: "Poppins", sans-serif;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Volunteer Styling */
+.leaderboard-quote {
+    background: linear-gradient(135deg, #46b34c, #2cd435);
+}
+
+.meet-volunteers {
+    background: linear-gradient(135deg, #3498db, #6ab1e6);
+    color: white;
+}
+
+/* Leaderboard Cards */
+.leaderboard-cards, 
+.recipient-cards {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.leaderboard-card, 
+.recipient-card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    width: 120px;
+}
+
+.leaderboard-card img, 
+.recipient-card img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+/* Recipient Styling */
+.impact-quote {
+    background: linear-gradient(135deg, #ff9f43, #ff6b81);
+}
+
+.meet-recipients {
+    background: linear-gradient(135deg, #e67e22, #f39c12);
+    color: white;
+}
+
+/* Buttons */
+.volunteer-profile-btn, 
+.recipient-profile-btn {
+    display: inline-block;
+    background-color: white;
+    color: #3498db;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-top: 10px;
+    transition: background 0.3s, color 0.3s;
+}
+
+.volunteer-profile-btn:hover, 
+.recipient-profile-btn:hover {
+    background: #ffffff;
+    color: #2874A6;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* View Buttons */
+.view-leaderboard, 
+.view-recipients {
+    font-size: 14px;
+    color: #007BFF;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease-in-out;
+}
+
+.view-leaderboard:hover, 
+.view-recipients:hover {
+    text-decoration: underline;
+    color: #0056b3;
+}

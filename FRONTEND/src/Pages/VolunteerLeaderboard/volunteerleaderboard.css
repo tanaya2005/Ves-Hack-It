@@ -1,0 +1,113 @@
+/* src/components/leaderboard.css */
+
+.leaderboard-container {
+    max-width: 700px;
+    margin: 3rem auto;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    text-align: center;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .leaderboard-container:hover {
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+  }
+  
+  h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #fe0606;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 1.5rem;
+    /* background: linear-gradient(45deg, #ffcc70, #c850c0, #4158d0); */
+    /* -webkit-background-clip: text; */
+    /* background-clip: border-box; */
+    /* -webkit-text-fill-color: transparent; */
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  thead {
+    background: linear-gradient(to right, #4CAF50, #388E3C);
+    color: white;
+  }
+  
+  th, td {
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    font-weight: 500;
+  }
+  
+  th {
+    font-size: 1.2rem;
+    text-transform: uppercase;
+  }
+  
+  tbody tr {
+    transition: all 0.3s ease-in-out;
+  }
+  
+  tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  tbody tr:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.02);
+  }
+  
+  td {
+    font-size: 1.1rem;
+    color: #15ce27;
+  }
+  
+  /* Rank Badge Styling */
+  .rank-badge {
+    display: inline-block;
+    font-weight: bold;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+  }
+  
+  .rank-1 {
+    background: linear-gradient(45deg, #ffd700, #ffb700);
+    color: #000;
+  }
+  
+  .rank-2 {
+    background: linear-gradient(45deg, #c0c0c0, #a9a9a9);
+    color: #000;
+  }
+  
+  .rank-3 {
+    background: linear-gradient(45deg, #cd7f32, #a65e2e);
+    color: #000;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .leaderboard-container {
+      max-width: 90%;
+      margin: 2rem auto;
+      padding: 1.5rem;
+    }
+  
+    th, td {
+      padding: 10px;
+      font-size: 1rem;
+    }
+  }
+  

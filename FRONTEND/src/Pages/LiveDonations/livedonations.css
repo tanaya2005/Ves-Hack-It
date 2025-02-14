@@ -1,0 +1,132 @@
+/* General Page Styles */
+.livedonations {
+    text-align: center;
+    padding: 25px;
+    font-family: "Poppins", sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Title Styling */
+.livedonations h2 {
+    font-size: 24px;
+    color: #222;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+/* Location Message */
+.livedonations p {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+/* Donation Cards Container */
+.donations-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 10px;
+}
+
+/* Individual Donation Card */
+.donation-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    width: 300px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid #e0e0e0;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.donation-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+}
+
+/* Donation Image */
+.donation-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* Donation Details */
+.donation-details {
+    text-align: center;
+    width: 100%;
+    padding: 2px 0;
+    flex-grow: 0.1; /* Allows details to take up remaining space */
+    display: flex;
+    flex-direction: column;
+    /* gap: 1px; */
+}
+
+.donation-details h3 {
+    color: #ff1201cf;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.donation-details p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.5;
+}
+
+.description {
+    font-style: italic;
+    color: #666;
+}
+
+/* No Donations Found */
+.no-donations {
+    font-size: 16px;
+    color: red;
+    font-weight: bold;
+    margin-top: 12px;
+}
+
+/* Action Buttons */
+.donation-actions {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+    margin-top: auto; /* Pushes buttons to the bottom */
+}
+
+.chat-btn, .accept-btn {
+    border: none;
+    padding: 8px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.chat-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+.chat-btn:hover {
+    background-color: #0056b3;
+}
+
+.accept-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.accept-btn:hover {
+    background-color: #1e7e34;
+}

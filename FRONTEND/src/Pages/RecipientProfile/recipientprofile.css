@@ -1,0 +1,211 @@
+/* Profile Page Layout */
+.profile-container {
+    display: flex;
+    margin: 30px;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background-color: #48e74d;
+    color: black;
+    padding-top: 20px;
+    height: 85vh;
+    margin-top: 10px;
+    margin-left: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+    width: 100%;
+}
+
+.sidebar ul li {
+    text-align: center;
+    padding: 15px;
+    font-size: 18px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: black;
+    display: block;
+    transition: color 0.3s ease-in-out;
+}
+
+.sidebar ul li a:hover {
+    color: white;
+    background-color: #388E3C;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.logout a {
+    color: #FF7043;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 20px;
+    background-color: white;
+    margin-left: 30px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Profile Section */
+.profile-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.profile-section img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #8BC34A;
+}
+
+.profile-section h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Donation Sections Container */
+.donation-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    margin-top: 20px;
+}
+
+/* Donation Boxes */
+.donation-box {
+    background-color: #f5f5f5;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    position: relative;
+    transition: transform 0.3s ease-in-out;
+}
+
+.donation-box:hover {
+    transform: scale(1.02);
+}
+
+.donation-box h3 {
+    font-size: 22px;
+    color: #333;
+}
+
+/* View All Link */
+.view-all {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 14px;
+    color: #007BFF;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease-in-out;
+}
+
+.view-all:hover {
+    text-decoration: underline;
+    color: #0056b3;
+}
+
+/* Donation Card */
+.donation-card {
+    background: white;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.15);
+    text-align: left;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.donation-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.donation-card h4 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+    font-weight: bold;
+}
+
+.donation-card p {
+    margin: 5px 0;
+    font-size: 15px;
+    color: #555;
+}
+
+/* Highlighting Status */
+.donation-card p strong {
+    color: #388E3C;
+    font-weight: bold;
+}
+
+.rdetails{
+    display: flex;
+    /* border: 2px solid gray; */
+    flex-direction: column;
+    padding: 20px;
+    background-color: wheat;
+    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+    gap: 10px;
+    margin-bottom: 20px;
+    font-size: 17px;
+    font-weight: 600;
+    text-align: center;
+    color: #010102;
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+/* Add these styles to your existing recipientprofile.css file */
+
+.location-button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.3s;
+}
+
+.location-button:hover {
+    background-color: #45a049;
+}
+
+.location-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Update the rdetails li to accommodate the location button */
+.rdetails li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+}

@@ -1,0 +1,122 @@
+export const livedons = [
+    {
+        _id: "FD001",
+        food_name: "Vegetable Biryani",
+        donor_name: "Priya Patel",
+        Image: "food1.jpeg",
+        description: "Freshly made vegetable biryani, can serve 15-20 people",
+        expirytime: "2025-02-09T18:00:00",
+        food_type: "Cooked Indian",
+        location_of_donor: "Andheri East, Mumbai",
+        latitude: 19.1197,
+        longitude: 72.8465
+    },
+    {
+        _id: "FD002",
+        food_name: "Whole Wheat Bread",
+        donor_name: "Sarah's Bakery",
+        Image: "bread.jpg",
+        description: "20 loaves of fresh whole wheat bread",
+        expirytime: "2025-02-11T12:00:00",
+        food_type: "Baked Goods",
+        location_of_donor: "Bandra West, Mumbai",
+        latitude: 19.0596,
+        longitude: 72.8295
+    },
+    {
+        _id: "FD003",
+        food_name: "Mixed Fruit Boxes",
+        donor_name: "Fresh Mart",
+        Image: "fruits.jpg",
+        description: "5 boxes of mixed seasonal fruits including apples, oranges, and bananas",
+        expirytime: "2025-02-10T15:00:00",
+        food_type: "Fresh Produce",
+        location_of_donor: "Powai, Mumbai",
+        latitude: 19.1200,
+        longitude: 72.9052
+    },
+    {
+        _id: "FD004",
+        food_name: "Dal Makhani",
+        donor_name: "Punjabi Kitchen",
+        Image: "dal.jpg",
+        description: "Large container of dal makhani, enough for 25 servings",
+        expirytime: "2025-02-09T20:00:00",
+        food_type: "Cooked Indian",
+        location_of_donor: "Juhu, Mumbai",
+        latitude: 19.0884,
+        longitude: 72.8266
+    },
+    {
+        _id: "FD005",
+        food_name: "Rice Packets",
+        donor_name: "Metro Cash & Carry",
+        Image: "rice.jpg",
+        description: "10 kg of basmati rice in 1kg packets",
+        expirytime: "2025-05-15T23:59:59",
+        food_type: "Dry Goods",
+        location_of_donor: "Thane West, Mumbai",
+        latitude: 19.2183,
+        longitude: 72.9781
+    },
+    {
+        _id: "FD006",
+        food_name: "Vegetable Sandwiches",
+        donor_name: "College Canteen",
+        Image: "sandwiches.jpg",
+        description: "30 fresh vegetable sandwiches",
+        expirytime: "2025-02-08T16:00:00",
+        food_type: "Snacks",
+        location_of_donor: "Vile Parle, Mumbai",
+        latitude: 19.1001,
+        longitude: 72.8367
+    },
+    {
+        _id: "FD007",
+        food_name: "Mixed Vegetables",
+        donor_name: "Green Grocer",
+        Image: "vegetables.jpg",
+        description: "Fresh vegetables including carrots, tomatoes, and potatoes",
+        expirytime: "2025-02-12T17:00:00",
+        food_type: "Fresh Produce",
+        location_of_donor: "Malad West, Mumbai",
+        latitude: 19.1860,
+        longitude: 72.8484
+    },
+    {
+        _id: "FD008",
+        food_name: "Chicken Curry",
+        donor_name: "Hotel Sunshine",
+        Image: "curry.jpg",
+        description: "Large batch of chicken curry, approximately 30 servings",
+        expirytime: "2025-02-09T21:00:00",
+        food_type: "Non-Vegetarian",
+        location_of_donor: "Colaba, Mumbai",
+        latitude: 18.9067,
+        longitude: 72.8147
+    },
+    {
+        _id: "FD009",
+        food_name: "Milk Packets",
+        donor_name: "Daily Dairy",
+        Image: "milk.jpg",
+        description: "20 packets of 500ml milk",
+        expirytime: "2025-02-10T08:00:00",
+        food_type: "Dairy",
+        location_of_donor: "Goregaon, Mumbai",
+        latitude: 19.1643,
+        longitude: 72.8493
+    },
+    {
+        _id: "FD010",
+        food_name: "Mixed Snack Boxes",
+        donor_name: "Party Palace",
+        Image: "snacks.jpg",
+        description: "Assorted snacks including samosas, pakoras, and sandwiches",
+        expirytime: "2025-02-08T22:00:00",
+        food_type: "Snacks",
+        location_of_donor: "Worli, Mumbai",
+        latitude: 19.0167,
+        longitude: 72.8158
+    }
+];

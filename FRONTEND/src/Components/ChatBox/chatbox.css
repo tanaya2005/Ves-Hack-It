@@ -1,0 +1,12 @@
+.chatbox img{
+    border-radius: 50px;
+    height: 60px;
+    width: 60px;  
+    size: 100px;  
+}
+
+body{
+    /* position: sticky; */
+    bottom: 10px;
+    /* width: 100%; */
+}

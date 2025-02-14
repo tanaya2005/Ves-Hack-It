@@ -1,0 +1,131 @@
+.edit-profile {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+h2 {
+    color: #2E7D32;
+    margin-bottom: 20px;
+}
+
+/* Profile Picture Upload */
+.profile-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.profile-image-label {
+    position: relative;
+    cursor: pointer;
+}
+
+.profile-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #4CAF50;
+}
+
+.upload-text {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: none;
+}
+
+.profile-image-label:hover .upload-text {
+    display: block;
+}
+
+/* Form Styling */
+.form-group {
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Adjustments for Textarea */
+.form-group textarea {
+    resize: none;
+}
+
+/* Security Buttons */
+.security-section {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.change-password,
+.delete-account {
+    flex: 1;
+    padding: 10px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.change-password {
+    background: #2196F3;
+    color: white;
+}
+
+.delete-account {
+    background: red;
+    color: white;
+}
+
+.change-password:hover {
+    background: #0b7dda;
+}
+
+.delete-account:hover {
+    background: darkred;
+}
+
+/* Save Button */
+.save-btn {
+    width: 100%;
+    padding: 12px;
+    background: #4CAF50;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.save-btn:hover {
+    background: #388E3C;
+}
