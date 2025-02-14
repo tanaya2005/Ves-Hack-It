@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:kindmeals/models/volunteer.dart';
+// import 'package:kindmeals/models/volunteer.dart';
 import '../services/api_service.dart';
 
 class VolunteerSignup extends StatelessWidget {
@@ -19,29 +19,29 @@ class VolunteerSignup extends StatelessWidget {
 
   // Save volunteer data to MongoDB
   Future<void> _saveVolunteerData(BuildContext context, String uid) async {
-  try {
-    final volunteer = {
-      'id': uid,
-      'name': fullNameController.text.trim(),
-      'email': emailController.text.trim(),
-      'phone': phoneController.text.trim(),
-      'address': addressController.text.trim(),
-      'availableDays': [] // Add this even if empty
-    };
+    try {
+      final volunteer = {
+        'id': uid,
+        'name': fullNameController.text.trim(),
+        'email': emailController.text.trim(),
+        'phone': phoneController.text.trim(),
+        'address': addressController.text.trim(),
+        'availableDays': [] // Add this even if empty
+      };
 
-    print('Volunteer data: $volunteer'); // Debug print
-    
-    await _apiService.registerVolunteer(volunteer);
-    
-    // Navigate only after successful save
-    Navigator.pushReplacementNamed(context, '/volunteer_document_dashboard');
-  } catch (e) {
-    print('Error saving volunteer data: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error saving volunteer data: ${e.toString()}')),
-    );
+      print('Volunteer data: $volunteer'); // Debug print
+
+      await _apiService.registerVolunteer(volunteer);
+
+      // Navigate only after successful save
+      Navigator.pushReplacementNamed(context, '/volunteer_document_dashboard');
+    } catch (e) {
+      print('Error saving volunteer data: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error saving volunteer data: ${e.toString()}')),
+      );
+    }
   }
-}
 
   // Email/Password Sign-Up
   Future<void> _signUpWithEmail(BuildContext context) async {
