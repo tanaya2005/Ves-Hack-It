@@ -1,0 +1,397 @@
+import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:dio/dio.dart';
+
+class PostDonationScreen extends StatefulWidget {
+  const PostDonationScreen({super.key});
+
+  @override
+  _PostDonationScreenState createState() => _PostDonationScreenState();
+}
+
+class _PostDonationScreenState extends State<PostDonationScreen> {
+  final _formKey = GlobalKey<FormState>();
+  Position? _currentPosition;
+  final TextEditingController _manualLocationController = TextEditingController();
+  final TextEditingController _quantityController = TextEditingController();
+  final TextEditingController _expiryDateController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _foodNameController = TextEditingController();
+  XFile? _image;
+  bool _isVeg = false;
+  bool _isNonVeg = false;
+  TimeOfDay? _selectedTime;
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _manualLocationController.dispose();
+    _quantityController.dispose();
+    _expiryDateController.dispose();
+    _descriptionController.dispose();
+    _foodNameController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildLocationField() {
+    return TextFormField(
+      controller: _manualLocationController,
+      decoration: InputDecoration(
+        labelText: 'Location Description',
+        hintText: 'Enter area name, landmark, etc.',
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      enabled: !_isLoading,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter location details';
+        }
+        return null;
+      },
+    );
+  }
+
+  Future<void> _silentlyGetLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return;
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) return;
+      }
+
+      if (permission == LocationPermission.deniedForever) return;
+
+      Position position = await Geolocator.getCurrentPosition();
+      setState(() => _currentPosition = position);
+    } catch (e) {
+      print('Silent location fetch error: $e');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _silentlyGetLocation();
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        _image = pickedFile;
+      });
+    }
+  }
+
+  Future<void> _selectTime() async {
+    TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (pickedTime != null && pickedTime != _selectedTime) {
+      setState(() {
+        _selectedTime = pickedTime;
+      });
+    }
+  }
+
+  Future<void> _submitDonation() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      if (_image == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select an image.'), backgroundColor: Colors.red),
+        );
+        return;
+      }
+
+      setState(() => _isLoading = true);
+
+      try {
+        var dio = Dio();
+        var formData = FormData();
+
+        formData.fields.addAll([
+          MapEntry('foodName', _foodNameController.text),
+          MapEntry('quantity', _quantityController.text),
+          MapEntry('description', _descriptionController.text),
+          MapEntry('expiryDateTime', _expiryDateController.text),
+          MapEntry('isVeg', _isVeg.toString()),
+          MapEntry('isNonVeg', _isNonVeg.toString()),
+          MapEntry('location', _manualLocationController.text),
+        ]);
+
+        formData.files.add(MapEntry(
+          'image',
+          await MultipartFile.fromFile(_image!.path, filename: 'donation_image.jpg'),
+        ));
+
+        if (_currentPosition != null) {
+          formData.fields.addAll([
+            MapEntry('latitude', _currentPosition!.latitude.toString()),
+            MapEntry('longitude', _currentPosition!.longitude.toString()),
+          ]);
+        }
+
+        var response = await dio.post(
+          'http://192.168.7.180:3000/api/donations',
+          data: formData,
+          options: Options(headers: {'Accept': 'application/json'}),
+        );
+
+        if (response.statusCode == 201) {
+          if (!mounted) return;
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Donation posted successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          _formKey.currentState?.reset();
+          setState(() {
+            _image = null;
+            _isVeg = false;
+            _isNonVeg = false;
+            _currentPosition = null;
+            _foodNameController.clear();
+            _quantityController.clear();
+            _descriptionController.clear();
+            _expiryDateController.clear();
+            _manualLocationController.clear();
+            _selectedTime = null;
+          });
+        }
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}'), backgroundColor: Colors.red),
+        );
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _selectDateAndTime() async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 30)),
+    );
+    await _selectTime();
+    if (_selectedTime != null) {
+      setState(() {
+        _expiryDateController.text =
+            '${pickedDate?.day}/${pickedDate?.month}/${pickedDate?.year} ${_selectedTime!.format(context)}';
+      });
+    }
+    }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Post Donation'),
+        backgroundColor: Colors.green,
+      ),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      GestureDetector(
+                        onTap: _isLoading ? null : _pickImage,
+                        child: Container(
+                          width: double.infinity,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: _image == null
+                              ? const Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.add_a_photo,
+                                          size: 50, color: Colors.grey),
+                                      SizedBox(height: 8),
+                                      Text('Tap to add photo',
+                                          style: TextStyle(color: Colors.grey)),
+                                    ],
+                                  ),
+                                )
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.file(
+                                    File(_image!.path),
+                                    width: double.infinity,
+                                    height: 200,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: CheckboxListTile(
+                              title: const Text('Veg'),
+                              value: _isVeg,
+                              onChanged: _isLoading
+                                  ? null
+                                  : (bool? value) {
+                                      setState(() {
+                                        _isVeg = value ?? false;
+                                        if (_isVeg) _isNonVeg = false;
+                                      });
+                                    },
+                            ),
+                          ),
+                          Expanded(
+                            child: CheckboxListTile(
+                              title: const Text('Non-Veg'),
+                              value: _isNonVeg,
+                              onChanged: _isLoading
+                                  ? null
+                                  : (bool? value) {
+                                      setState(() {
+                                        _isNonVeg = value ?? false;
+                                        if (_isNonVeg) _isVeg = false;
+                                      });
+                                    },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _foodNameController,
+                        decoration: InputDecoration(
+                          labelText: 'Food Name',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        enabled: !_isLoading,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter the food name';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _quantityController,
+                        decoration: InputDecoration(
+                          labelText: 'Quantity',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        enabled: !_isLoading,
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter the quantity';
+                          }
+                          if (int.tryParse(value) == null) {
+                            return 'Please enter a valid number';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _descriptionController,
+                        decoration: InputDecoration(
+                          labelText: 'Description',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        enabled: !_isLoading,
+                        maxLines: 3,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a description';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _expiryDateController,
+                        decoration: InputDecoration(
+                          labelText: 'Expiry Date and Time',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        enabled: !_isLoading,
+                        readOnly: true,
+                        onTap: _isLoading ? null : _selectDateAndTime,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter the expiry date';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      _buildLocationField(),
+                      const SizedBox(height: 24),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _submitDonation,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            minimumSize: const Size(double.infinity, 48),
+                          ),
+                          child: _isLoading
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : const Text(
+                                  'Post Donation',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (_isLoading)
+            const Center(
+              child: CircularProgressIndicator(),
+            ),
+        ],
+      ),
+    );
+  }
+}
