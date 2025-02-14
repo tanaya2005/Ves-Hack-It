@@ -36,7 +36,7 @@ const donationSchema = new mongoose.Schema({
   foodName: { type: String, required: true },
   quantity: { type: Number, required: true },
   description: { type: String, required: true },
-  expiryDate: { type: String, required: true },
+  expiryDateTime: { type: String, required: true },
   isVeg: { type: Boolean, default: false },
   isNonVeg: { type: Boolean, default: false },
   imageUrl: { type: String },
@@ -130,6 +130,7 @@ const donorSchema = new mongoose.Schema({
   location: { type: String, required: true },
   organization: { type: String, required: true },
   currentPassword: { type: String, required: true },
+  userType: { type: String, default: 'Donor' },
 });
 
 const Donor = mongoose.model('Donor', donorSchema);
@@ -155,8 +156,8 @@ if (!fs.existsSync('uploads')) {
 // Your existing donation endpoints
 app.post('/api/donations', upload.single('image'), async (req, res) => {
   try {
-    const { foodName, quantity, description, expiryDate, isVeg, isNonVeg, location, latitude, longitude } = req.body;
-    if (!foodName || !quantity || !description || !expiryDate) {
+    const { foodName, quantity, description, expiryDateTime, isVeg, isNonVeg, location, latitude, longitude } = req.body;
+    if (!foodName || !quantity || !description || !expiryDateTime) {
       return res.status(400).json({ error: 'Missing required fields.' });
     }
 
@@ -164,7 +165,7 @@ app.post('/api/donations', upload.single('image'), async (req, res) => {
       foodName,
       quantity: parseInt(quantity),
       description,
-      expiryDate,
+      expiryDateTime,
       isVeg: isVeg === 'true',
       isNonVeg: isNonVeg === 'true',
       imageUrl: req.file ? `/uploads/${req.file.filename}` : null,
@@ -212,7 +213,7 @@ app.post('/api/donors', async (req, res) => {
       name,
       email,
       phone,
-      location,
+      location, 
       organization,
       currentPassword
     });

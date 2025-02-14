@@ -123,7 +123,7 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
           MapEntry('foodName', _foodNameController.text),
           MapEntry('quantity', _quantityController.text),
           MapEntry('description', _descriptionController.text),
-          MapEntry('expiryDate', _expiryDateController.text),
+          MapEntry('expiryDateTime', _expiryDateController.text),
           MapEntry('isVeg', _isVeg.toString()),
           MapEntry('isNonVeg', _isNonVeg.toString()),
           MapEntry('location', _manualLocationController.text),
@@ -142,7 +142,7 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
         }
 
         var response = await dio.post(
-          'http://192.168.0.100:3000/api/donations',
+          'http://192.168.7.180:3000/api/donations',
           data: formData,
           options: Options(headers: {'Accept': 'application/json'}),
         );

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.0.100:3000/api';
+  static const String baseUrl = 'http://192.168.7.180:3000/api';
   static Future<Map<String, dynamic>> registerUser(
       Map<String, dynamic> userData, String userType) async {
     try {

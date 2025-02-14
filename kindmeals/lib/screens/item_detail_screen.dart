@@ -105,9 +105,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         // Remove donation from live requests
         widget.onDonationAccepted(donationId);
 
-        if (mounted) {
-          _showDonationAcceptedDialog();
-        }
+        // if (mounted) {
+        //   _showDonationAcceptedDialog();
+        // }
       }
     } catch (e) {
       if (mounted) {
@@ -278,6 +278,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               child: const Text('Confirm Pickup'),
               onPressed: () {
                 Navigator.pop(context);
+
+                // Now show the final donation accepted dialog
                 _showDonationAcceptedDialog();
               },
             ),
@@ -316,11 +318,14 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               ),
               child: const Text('OK'),
               onPressed: () {
-
-                // Close dialog and item detail screen
+                final donationId = widget.request['id'];
+                if (donationId != null) {
+                  widget.onDonationAccepted(
+                      donationId); // Remove only after confirmation
+                }
                 Navigator.of(context)
-                ..pop()
-                ..pop();
+                  ..pop() // Close dialog
+                  ..pop(); // Close item detail screen
               },
             ),
           ],
@@ -423,7 +428,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       _buildInfoRow(Icons.scale, 'Quantity',
                           widget.request['quantity'] ?? 'N/A'),
                       _buildInfoRow(Icons.access_time, 'Expiry Date',
-                          widget.request['expiryDate'] ?? 'N/A'),
+                          widget.request['expiryDateTime'] ?? 'N/A'),
                       _buildInfoRow(Icons.description, 'Description',
                           widget.request['description'] ?? 'N/A'),
                       _buildInfoRow(Icons.location_on, 'Location',
