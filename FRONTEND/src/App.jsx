@@ -25,6 +25,7 @@ import DonorProfile from './Pages/DonorProfile/donorprofile';
 import RecipientProfile from './Pages/RecipientProfile/recipientprofile';
 import VolunteerProfile from './Pages/VolunteerProfile/volunteerprofile';
 import ProtectedRoute from './Components/ProtectedRoute/protectedroute'; // Add this import
+import MyDeliveries from './Pages/MyDeliveries/MyDeliveries';
 
 const App = () => {
   return (
@@ -50,6 +51,7 @@ const App = () => {
           <Route path="/help" element={<Help />} />
           <Route path="/Volunteerleaderboard" element={<VolunteerLeaderboard />} />
           <Route path="/Activedonation" element={<ActiveDonations />} />
+          <Route path='/my-deliveries' element={<MyDeliveries />} />
           <Route 
             path="/donorprofile" 
             element={

@@ -13,9 +13,13 @@ const volunteerSchema = new mongoose.Schema({
     identificationDoc: { type: String, required: true },
     docImage: { type: String, required: true },
     coordinates: {
-        latitude: {type: Number,required: false},
-    longitude: {type: Number,required: false}
-        }
+        latitude: { type: Number, required: false },
+        longitude: { type: Number, required: false }
+    },
+    activeOrders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
+    completedOrders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }]
+}, {
+    timestamps: true
 });
 
 const VolunteerModel = mongoose.models.volunteer || mongoose.model("volunteer", volunteerSchema);

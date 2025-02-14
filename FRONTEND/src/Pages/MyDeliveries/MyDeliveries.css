@@ -1,0 +1,150 @@
+/* mydeliveries.css */
+.my-deliveries-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .my-deliveries-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .my-deliveries-header h1 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+  }
+  
+  .my-deliveries-header p {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+  }
+  
+  .loading-spinner,
+  .error-message,
+  .no-deliveries-message {
+    text-align: center;
+    padding: 40px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .error-message {
+    color: #e74c3c;
+  }
+  
+  .no-deliveries-message {
+    color: #7f8c8d;
+  }
+  
+  .delivery-cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+  }
+  
+  .delivery-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.3s ease;
+    border-left: 5px solid #3498db;
+  }
+  
+  .delivery-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .delivery-card.status-accepted {
+    border-left-color: #f39c12;
+  }
+  
+  .delivery-card.status-in_transit {
+    border-left-color: #e74c3c;
+  }
+  
+  .delivery-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .order-id {
+    font-weight: bold;
+    color: #3498db;
+  }
+  
+  .status-badge {
+    font-size: 0.9rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-transform: capitalize;
+    background-color: #eee;
+  }
+  
+  .status-badge.accepted {
+    background-color: #f39c12;
+    color: white;
+  }
+  
+  .status-badge.in_transit {
+    background-color: #e74c3c;
+    color: white;
+  }
+  
+  .location-detail,
+  .food-detail {
+    margin-bottom: 15px;
+  }
+  
+  .location-detail h4,
+  .food-detail h4 {
+    margin-bottom: 5px;
+    color: #2c3e50;
+  }
+  
+  .location-detail p,
+  .food-detail p {
+    margin: 0;
+    color: #7f8c8d;
+  }
+  
+  .food-quantity {
+    font-style: italic;
+    margin-top: 5px !important;
+  }
+  
+  .action-buttons {
+    margin-top: 20px;
+  }
+  
+  .update-status-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    color: white;
+  }
+  
+  .update-status-btn.in-transit {
+    background-color: #f39c12;
+  }
+  
+  .update-status-btn.in-transit:hover {
+    background-color: #e67e22;
+  }
+  
+  .update-status-btn.delivered {
+    background-color: #27ae60;
+  }
+  
+  .update-status-btn.delivered:hover {
+    background-color: #2ecc71;
+  }

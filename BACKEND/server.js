@@ -3,6 +3,7 @@ import cors from "cors";
 import { connectDB } from "./config/db.js";
 import donRouter from "./routes/donsroute.js";
 import userRouter from "./routes/userroute.js";
+import volunteerRoutes from './routes/volunteerRoutes.js';
 import path from "path";
 import { fileURLToPath } from 'url';
 import { EventEmitter } from 'events';  // Add this line
@@ -14,7 +15,7 @@ import 'dotenv/config';
 
 // app config
 const app = express();
-const port = 4000;
+const port = 5000;
 
 // middlewares
 app.use(express.json());
@@ -51,6 +52,7 @@ app.get("/", (req, res) => {
     res.send("API is working");
 });
 
+app.use('/api/volunteer', volunteerRoutes);
 
 //this was to handle images on the same ip address
 // const PORT = process.env.PORT || 3000;
