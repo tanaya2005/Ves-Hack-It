@@ -67,7 +67,7 @@ class _LiveDonationRequestsScreenState
   Future<void> _fetchDonationRequests() async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.7.180:3000/api/donations'),
+        Uri.parse('http://192.168.41.180:3000/api/donations'),
       );
 
       if (response.statusCode == 200) {
@@ -81,7 +81,7 @@ class _LiveDonationRequestsScreenState
               'expiryDateTime': item['expiryDateTime'] ?? 'Unknown',
               'description': item['description'] ?? 'No description provided',
               'image': item['imageUrl'] != null
-                  ? 'http://192.168.7.180:3000${item['imageUrl']}'
+                  ? 'http://192.168.41.180:3000${item['imageUrl']}'
                   : '',
               'location': item['location'] ?? '',
               'donorName': item['donorName'] ?? '',

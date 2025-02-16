@@ -2,8 +2,7 @@
 
 import 'package:kindmeals/screens/language_selection.dart';
 import 'package:kindmeals/screens/register_screen.dart';
-import 'package:kindmeals/screens/role_selection.dart';
-import 'package:kindmeals/screens/volunteer_screen.dart';
+import 'package:kindmeals/screens/volunteer_profile.dart';
 
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +55,6 @@ class KindMealsApp extends StatelessWidget {
           LanguageSelectionPage(), // Start with your existing LanguageSelectionScreen
       routes: {
         '/welcome': (context) => WelcomeSplashScreen(),
-        '/roleSelection': (context) => RoleSelection(),
         '/login': (context) => LoginScreen(),
         '/forgotPassword': (context) => ForgotPasswordScreen(),
         '/register': (context) => RegisterScreen(),
@@ -65,7 +63,7 @@ class KindMealsApp extends StatelessWidget {
               recipientName: "Test User",
               onMessageSent: (String message) {},
             ),
-        '/volunteer_dashboard': (context) => VolunteerScreen(),
+        '/volunteer_dashboard': (context) => VolunteerProfileScreen(),
       },
     );
   }

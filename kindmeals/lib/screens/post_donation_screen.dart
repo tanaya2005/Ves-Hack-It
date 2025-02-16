@@ -14,7 +14,8 @@ class PostDonationScreen extends StatefulWidget {
 class _PostDonationScreenState extends State<PostDonationScreen> {
   final _formKey = GlobalKey<FormState>();
   Position? _currentPosition;
-  final TextEditingController _manualLocationController = TextEditingController();
+  final TextEditingController _manualLocationController =
+      TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _expiryDateController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -108,7 +109,9 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
     if (_formKey.currentState?.validate() ?? false) {
       if (_image == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select an image.'), backgroundColor: Colors.red),
+          const SnackBar(
+              content: Text('Please select an image.'),
+              backgroundColor: Colors.red),
         );
         return;
       }
@@ -131,7 +134,8 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
 
         formData.files.add(MapEntry(
           'image',
-          await MultipartFile.fromFile(_image!.path, filename: 'donation_image.jpg'),
+          await MultipartFile.fromFile(_image!.path,
+              filename: 'donation_image.jpg'),
         ));
 
         if (_currentPosition != null) {
@@ -142,14 +146,14 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
         }
 
         var response = await dio.post(
-          'http://192.168.7.180:3000/api/donations',
+          'http://192.168.41.180:3000/api/donations',
           data: formData,
           options: Options(headers: {'Accept': 'application/json'}),
         );
 
         if (response.statusCode == 201) {
           if (!mounted) return;
-          
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Donation posted successfully!'),
@@ -174,7 +178,9 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('Error: ${e.toString()}'),
+              backgroundColor: Colors.red),
         );
       } finally {
         if (mounted) setState(() => _isLoading = false);
@@ -196,7 +202,7 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
             '${pickedDate?.day}/${pickedDate?.month}/${pickedDate?.year} ${_selectedTime!.format(context)}';
       });
     }
-    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -373,7 +379,8 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
                             minimumSize: const Size(double.infinity, 48),
                           ),
                           child: _isLoading
-                              ? const CircularProgressIndicator(color: Colors.white)
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white)
                               : const Text(
                                   'Post Donation',
                                   style: TextStyle(fontSize: 16),

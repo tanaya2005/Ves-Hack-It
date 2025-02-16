@@ -9,21 +9,7 @@ import 'post_donation_screen.dart';
 import 'live_requests_screen.dart';
 import 'charity_screen.dart';
 import 'nearby_ngos_screen.dart';
-import 'volunteer_screen.dart';
 import 'track_delivery_screen.dart';
-
-// // Dummy data for recent chats
-// class RecentChat {
-//   final String recipientName;
-//   final String lastMessage;
-//   final String time;
-
-//   RecentChat({
-//     required this.recipientName,
-//     required this.lastMessage,
-//     required this.time,
-//   });
-// }
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
@@ -56,29 +42,37 @@ class Dashboard extends StatelessWidget {
           mainAxisSpacing: 16,
           children: [
             _buildDashboardCard(Icons.food_bank, 'Post Donation', () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const PostDonationScreen()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const PostDonationScreen()));
             }),
-            _buildDashboardCard(Icons.request_page, 'Live Donation Requests', () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => LiveDonationRequestsScreen()));
+            _buildDashboardCard(Icons.request_page, 'Live Donation Requests',
+                () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => LiveDonationRequestsScreen()));
             }),
             _buildDashboardCard(Icons.monetization_on, 'Charity', () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => CharityScreen()));
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (_) => CharityScreen()));
             }),
             _buildDashboardCard(Icons.location_on, 'Nearby NGOs', () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const NearbyNGOsScreen()));
-            }),
-            _buildDashboardCard(Icons.volunteer_activism, 'Volunteer', () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const VolunteerScreen()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const NearbyNGOsScreen()));
             }),
             _buildDashboardCard(Icons.delivery_dining, 'Track Delivery', () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const TrackDeliveryScreen()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const TrackDeliveryScreen()));
             }),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate to the recent chats screen
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -113,14 +107,16 @@ class Dashboard extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const DonorProfile(), // Navigate to DonorProfile
+                      builder: (_) =>
+                          const DonorProfile(), // Navigate to DonorProfile
                     ),
                   );
                 } else {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const RecipientProfile(), // Navigate to RecipientProfile
+                      builder: (_) =>
+                          const RecipientProfile(), // Navigate to RecipientProfile
                     ),
                   );
                 }
@@ -130,7 +126,10 @@ class Dashboard extends StatelessWidget {
               leading: const Icon(Icons.history),
               title: const Text('History'),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const DonationHistoryScreen()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const DonationHistoryScreen()));
               },
             ),
             ListTile(
@@ -189,7 +188,8 @@ class Dashboard extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
             ],
