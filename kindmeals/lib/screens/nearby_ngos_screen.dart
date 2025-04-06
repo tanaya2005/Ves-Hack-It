@@ -65,8 +65,6 @@ class _NearbyNGOsScreenState extends State<NearbyNGOsScreen> {
       }
 
       // Get current location
-      Position position = await Geolocator.getCurrentPosition();
-
       // TODO: Replace with actual API call to fetch NGOs
       // Simulated API response
       await Future.delayed(const Duration(seconds: 2));

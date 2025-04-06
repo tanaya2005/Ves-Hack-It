@@ -23,27 +23,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController organizationController = TextEditingController();
   final TextEditingController aboutController = TextEditingController();
   final TextEditingController recipientIdController = TextEditingController();
-  final TextEditingController volunteerDetailsController = TextEditingController();
+  final TextEditingController volunteerDetailsController =
+      TextEditingController();
 
   void _navigateBasedOnRole(String email) {
     switch (selectedRole) {
       case 'donor':
-        Navigator.pushReplacementNamed(context, '/donor_profile', 
-          arguments: {'email': email});
+        Navigator.pushReplacementNamed(context, '/donor_profile',
+            arguments: {'email': email});
         break;
       case 'recipient':
         Navigator.pushReplacementNamed(context, '/recipient_profile',
-          arguments: {'email': email});
+            arguments: {'email': email});
         break;
       case 'volunteer':
         Navigator.pushReplacementNamed(context, '/volunteer_profile',
-          arguments: {'email': email});
+            arguments: {'email': email});
         break;
     }
   }
@@ -52,7 +54,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Location services are disabled. Please enable them.')),
+        const SnackBar(
+            content:
+                Text('Location services are disabled. Please enable them.')),
       );
       return;
     }
@@ -70,14 +74,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (permission == LocationPermission.deniedForever) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Location permission is permanently denied.')),
+        const SnackBar(
+            content: Text('Location permission is permanently denied.')),
       );
       return;
     }
 
     Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high
-    );
+        desiredAccuracy: LocationAccuracy.high);
     setState(() {
       addressController.text = '${position.latitude}, ${position.longitude}';
     });
@@ -86,12 +90,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _registerWithEmail(BuildContext context) async {
     if (selectedRole == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a role (Donor, Recipient, Volunteer)')),
+        const SnackBar(
+            content:
+                Text('Please select a role (Donor, Recipient, Volunteer)')),
       );
       return;
     }
 
-    if (passwordController.text.trim() != confirmPasswordController.text.trim()) {
+    if (passwordController.text.trim() !=
+        confirmPasswordController.text.trim()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Passwords do not match!')),
       );
@@ -107,7 +114,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         },
       );
 
-      final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      final UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
@@ -131,7 +139,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         };
 
         try {
-          final response = await ApiService.registerUser(userData, selectedRole!);
+          final response =
+              await ApiService.registerUser(userData, selectedRole!);
           print('MongoDB Registration successful: ${response['message']}');
 
           Navigator.pop(context); // Close loading
@@ -143,7 +152,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               builder: (BuildContext context) {
                 return AlertDialog(
                   title: const Text('Registration Successful'),
-                  content: const Text('A verification email has been sent. Please verify your email to continue.'),
+                  content: const Text(
+                      'A verification email has been sent. Please verify your email to continue.'),
                   actions: [
                     TextButton(
                       onPressed: () {
@@ -177,12 +187,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _signInWithGoogle(BuildContext context) async {
     if (selectedRole == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a role (Donor, Recipient, Volunteer)')),
+        const SnackBar(
+            content:
+                Text('Please select a role (Donor, Recipient, Volunteer)')),
       );
       return;
     }
 
-    final GoogleSignIn googleSignIn = GoogleSignIn(signInOption: SignInOption.standard);
+    final GoogleSignIn googleSignIn =
+        GoogleSignIn(signInOption: SignInOption.standard);
     try {
       showDialog(
         context: context,
@@ -195,12 +208,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       await googleSignIn.signOut();
       final GoogleSignInAccount? account = await googleSignIn.signIn();
       if (account != null) {
-        final GoogleSignInAuthentication googleAuth = await account.authentication;
+        final GoogleSignInAuthentication googleAuth =
+            await account.authentication;
         final credential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
-        
+
         final userCredential = await _auth.signInWithCredential(credential);
         final user = userCredential.user;
 
@@ -240,7 +254,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedImage =
+        await picker.pickImage(source: ImageSource.gallery);
     setState(() {
       _image = pickedImage;
     });
@@ -301,7 +316,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           labelText: label,
           hintText: hint,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
           filled: true,
           fillColor: Colors.grey[200],
         ),
@@ -340,9 +356,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: CircleAvatar(
                   radius: 55,
                   backgroundColor: Colors.grey[300],
-                  backgroundImage: _image != null ? FileImage(File(_image!.path)) : null,
+                  backgroundImage:
+                      _image != null ? FileImage(File(_image!.path)) : null,
                   child: _image == null
-                      ? const Icon(Icons.camera_alt, size: 50, color: Colors.grey)
+                      ? const Icon(Icons.camera_alt,
+                          size: 50, color: Colors.grey)
                       : null,
                 ),
               ),
@@ -350,8 +368,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
               _buildTextField(nameController, 'Full Name'),
               _buildTextField(emailController, 'Email Address'),
               _buildTextField(passwordController, 'Password', isPassword: true),
-              _buildTextField(confirmPasswordController, 'Confirm Password', isPassword: true),
-              _buildTextField(phoneController, 'Phone Number', keyboardType: TextInputType.phone),
+              _buildTextField(confirmPasswordController, 'Confirm Password',
+                  isPassword: true),
+              _buildTextField(phoneController, 'Phone Number',
+                  keyboardType: TextInputType.phone),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: TextField(
@@ -362,10 +382,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       icon: const Icon(Icons.location_on),
                       onPressed: _getCurrentLocation,
                     ),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     filled: true,
                     fillColor: Colors.grey[200],
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 12),
                   ),
                 ),
               ),
@@ -432,7 +454,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
                 child: const Text('Register', style: TextStyle(fontSize: 16)),
               ),
@@ -444,38 +467,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text('OR'),
-                    ),
-                    Expanded(child: Divider(thickness: 1)),
-                  ],
                   ),
-                  SizedBox(height: screenSize.height * 0.02),
-                  ElevatedButton.icon(
-                  onPressed: () => _signInWithGoogle(context),
-                  icon: const Icon(Icons.login, color: Colors.white),
-                  label: const Text('Sign in with Google', style: TextStyle(fontSize: 16)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  ),
-                  SizedBox(height: screenSize.height * 0.02),
-                  Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Already have an account?'),
-                    TextButton(
+                  Expanded(child: Divider(thickness: 1)),
+                ],
+              ),
+              SizedBox(height: screenSize.height * 0.02),
+              ElevatedButton.icon(
+                onPressed: () => _signInWithGoogle(context),
+                icon: const Icon(Icons.login, color: Colors.white),
+                label: const Text('Sign in with Google',
+                    style: TextStyle(fontSize: 16)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              SizedBox(height: screenSize.height * 0.02),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Already have an account?'),
+                  TextButton(
                     onPressed: () {
                       Navigator.pushReplacementNamed(context, '/login');
                     },
-                    child: const Text('Login', style: TextStyle(color: Colors.green)),
-                    ),
-                  ],
+                    child: const Text('Login',
+                        style: TextStyle(color: Colors.green)),
                   ),
                 ],
-                ),
               ),
-              ),
-            );
-            }
-          }
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

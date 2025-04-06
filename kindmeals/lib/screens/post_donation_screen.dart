@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:kindmeals/screens/api_service.dart';
 
 class PostDonationScreen extends StatefulWidget {
   const PostDonationScreen({super.key});
@@ -130,6 +131,8 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
           MapEntry('isVeg', _isVeg.toString()),
           MapEntry('isNonVeg', _isNonVeg.toString()),
           MapEntry('location', _manualLocationController.text),
+          MapEntry('postedBy',
+              'rahatgaonkarvarun@gmail.com'), // Replace with actual user email or ID
         ]);
 
         formData.files.add(MapEntry(
@@ -146,7 +149,7 @@ class _PostDonationScreenState extends State<PostDonationScreen> {
         }
 
         var response = await dio.post(
-          'http://192.168.41.180:3000/api/donations',
+          '${ApiService.baseUrl}/donations', // Add the specific endpoint
           data: formData,
           options: Options(headers: {'Accept': 'application/json'}),
         );

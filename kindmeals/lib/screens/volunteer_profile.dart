@@ -21,7 +21,7 @@ class VolunteerProfileScreen extends StatelessWidget {
               const Center(
                 child: CircleAvatar(
                   radius: 50,
-                  backgroundImage: AssetImage('assets/profile_pic.png'),
+                  backgroundImage: AssetImage('assets/download.jpeg'),
                 ),
               ),
               Positioned(
@@ -64,6 +64,18 @@ class VolunteerProfileScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           const Divider(thickness: 1),
+          _buildProfileOption(
+            context,
+            icon: Icons.edit,
+            title: "Edit Profile",
+            destination: const EditProfileScreen(),
+          ),
+          _buildProfileOption(
+            context,
+            icon: Icons.edit,
+            title: "Edit Profile",
+            destination: const EditProfileScreen(),
+          ),
           _buildProfileOption(
             context,
             icon: Icons.edit,
@@ -119,7 +131,7 @@ class VolunteerProfileScreen extends StatelessWidget {
               icon: Icons.list,
               label: "Orders",
               onPressed: () {
-                Navigator.pushReplacementNamed(context, '/volunteerOrdersPage');
+                Navigator.pushReplacementNamed(context, '/volunteersOrderPage');
               },
             ),
             _bottomNavButton(

@@ -4,6 +4,7 @@ import 'package:kindmeals/screens/donor_profile.dart';
 import 'package:kindmeals/screens/notification_screen.dart';
 import 'package:kindmeals/screens/recipient_profile.dart';
 import 'package:kindmeals/screens/user_role.dart';
+import 'package:kindmeals/screens/volunteer_profile.dart';
 import 'chat_screen.dart';
 import 'post_donation_screen.dart';
 import 'live_requests_screen.dart';
@@ -61,6 +62,12 @@ class Dashboard extends StatelessWidget {
             _buildDashboardCard(Icons.location_on, 'Nearby NGOs', () {
               Navigator.push(context,
                   MaterialPageRoute(builder: (_) => const NearbyNGOsScreen()));
+            }),
+            _buildDashboardCard(Icons.location_on, 'Volunteer Page', () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const VolunteerProfileScreen()));
             }),
             _buildDashboardCard(Icons.delivery_dining, 'Track Delivery', () {
               Navigator.push(

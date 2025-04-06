@@ -22,7 +22,7 @@ class _WelcomeSplashScreenState extends State<WelcomeSplashScreen> with SingleTi
     _controller.forward();
 
     Timer(Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, '/roleSelection');
+      Navigator.pushReplacementNamed(context, '/language');
     });
   }
 

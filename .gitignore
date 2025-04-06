@@ -1,0 +1,9 @@
+/kindmeals/node/node_modules
+*.ts
+/kindmeals/node/node_modules/@firebase/data-connect/dist/node-esm/src
+/kindmeals/node
+/kindmeals/android
+/kindmeals/android
+kindmeals/assets/download.jpeg
+kindmeals/lib/firebase_options.dart
+kindmeals/android/app/google-services.json
