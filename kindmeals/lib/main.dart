@@ -58,7 +58,7 @@ class KindMealsApp extends StatelessWidget {
         '/welcome': (context) => WelcomeSplashScreen(),
         '/login': (context) => LoginScreen(),
         '/forgotPassword': (context) => ForgotPasswordScreen(),
-        '/register': (context) => RegisterScreen(),
+        '/register': (context) => RegistrationScreen(),
         '/dashboard': (context) => Dashboard(),
         '/chatScreen': (context) => ChatScreen(
               recipientName: "Test User",
