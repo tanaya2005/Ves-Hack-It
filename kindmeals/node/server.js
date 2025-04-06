@@ -157,7 +157,7 @@
 //     orgName: { type: String, required: true },
 //     latitude: {type: Number,required: false},
 //     longitude: {type: Number,required: false}
-        
+
 // });
 
 // const Donor = mongoose.model('Donor', donorSchema);
@@ -174,7 +174,7 @@
 //   orgName: { type: String, required: true },
 //   latitude: {type: Number,required: false},
 //   longitude: {type: Number,required: false}
-  
+
 // });
 
 
@@ -192,7 +192,7 @@
 //   docImage: { type: String, required: true },
 //   latitude: {type: Number,required: false},
 //   longitude: {type: Number,required: false}
-  
+
 // });
 // // Create uploads directory if it doesn't exist
 // if (!fs.existsSync('uploads')) {
@@ -405,6 +405,10 @@
 // const PORT = process.env.PORT || 3000;
 // app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
 
+
+require('dotenv').config();
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -427,7 +431,18 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    if (extname) {
+      return cb(null, true);
+    }
+    cb(new Error('Only JPEG, JPG and PNG files are allowed'));
+  }
+});
 
 // Create uploads directory if it doesn't exist
 if (!fs.existsSync('uploads')) {
@@ -436,17 +451,17 @@ if (!fs.existsSync('uploads')) {
 
 // MongoDB connection
 mongoose
-  .connect('mongodb+srv://tanaya:mongotan@cluster0.9e5vj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+   .connect('mongodb+srv://tanaya:mongotan@cluster0.9e5vj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
   .then(() => console.log('MongoDB Connected'))
   .catch((err) => console.log(err));
 
 // Schemas
 const donationSchema = new mongoose.Schema({
   foodName: { type: String, required: true },
-  quantity: { type: String, required: true },
+  quantity: { type: Number, required: true },
   description: { type: String, required: true },
   expiryDateTime: { type: String, required: true },
   isVeg: { type: Boolean, default: false },
@@ -537,17 +552,17 @@ const Volunteer = mongoose.model('Volunteer', volunteerSchema);
 // Donation Routes
 app.post('/api/donations', upload.single('image'), async (req, res) => {
   try {
-    const { 
-      foodName, 
-      quantity, 
-      description, 
-      expiryDateTime, 
-      isVeg, 
-      isNonVeg, 
-      location, 
-      latitude, 
+    const {
+      foodName,
+      quantity,
+      description,
+      expiryDateTime,
+      isVeg,
+      isNonVeg,
+      location,
+      latitude,
       longitude,
-      postedBy 
+      postedBy
     } = req.body;
 
     if (!foodName || !quantity || !description || !expiryDateTime || !postedBy) {
@@ -574,6 +589,19 @@ app.post('/api/donations', upload.single('image'), async (req, res) => {
   } catch (error) {
     console.error('Error saving donation:', error);
     res.status(500).json({ error: 'Error saving donation.' });
+  }
+});
+
+app.get('/api/donations/:id', async (req, res) => {
+  try {
+    const donation = await Donation.findById(req.params.id);
+    if (!donation) {
+      return res.status(404).json({ error: 'Donation not found' });
+    }
+    res.json(donation);
+  } catch (error) {
+    console.error('Error fetching donation:', error);
+    res.status(500).json({ error: 'Error fetching donation' });
   }
 });
 
@@ -607,7 +635,7 @@ app.post('/api/donations/accept', async (req, res) => {
     // Create accepted donation record
     const acceptedDonation = new AcceptedDonation({
       ...donation.toObject(),
-      originalDonationId: donationId,
+      donorId: donation.postedBy,
       acceptedBy: recipientId,
       needsVolunteer: needsVolunteer || false,
       isAccepted: true,
@@ -661,7 +689,7 @@ app.post('/api/donors/register', upload.single('profileImage'), async (req, res)
       username,
       email,
       contact,
-      currentPassword,
+      currentPassword: await bcrypt.hash(currentPassword, saltRounds),
       about,
       profileImage: req.file ? `/uploads/${req.file.filename}` : null,
       orgName,
@@ -703,7 +731,7 @@ app.post('/api/recipients/register', upload.single('profileImage'), async (req, 
       username,
       email,
       contact,
-      currentPassword,
+      currentPassword: await bcrypt.hash(currentPassword, saltRounds),
       about,
       profileImage: req.file ? `/uploads/${req.file.filename}` : null,
       orgName,
@@ -748,7 +776,7 @@ app.post('/api/volunteers/register', upload.fields([
       username,
       email,
       contact,
-      currentPassword,
+      currentPassword: await bcrypt.hash(currentPassword, saltRounds),
       about,
       profileImage: req.files['profileImage'] ? `/uploads/${req.files['profileImage'][0].filename}` : null,
       identificationDoc,
@@ -832,17 +860,17 @@ app.post('/api/login', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    if (user.currentPassword !== currentPassword) {
+    const isMatch = await bcrypt.compare(currentPassword, user.currentPassword);
+    if (!isMatch) {
       return res.status(401).json({ error: 'Invalid password' });
-      }
+    }
+    res.json({ message: 'Login successful', user });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Error during login' });
+  }
+});
 
-      res.json({ message: 'Login successful', user });
-      } catch (error) {
-      console.error('Login error:', error);
-      res.status(500).json({ error: 'Error during login' });
-      }
-    });
-
-    // Start the server
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
