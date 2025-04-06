@@ -2,6 +2,7 @@
 
 import 'package:kindmeals/screens/language_selection.dart';
 import 'package:kindmeals/screens/register_screen.dart';
+import 'package:kindmeals/screens/volunteer_orders_page.dart';
 import 'package:kindmeals/screens/volunteer_profile.dart';
 
 import 'firebase_options.dart';
@@ -64,6 +65,7 @@ class KindMealsApp extends StatelessWidget {
               onMessageSent: (String message) {},
             ),
         '/volunteer_dashboard': (context) => VolunteerProfileScreen(),
+        '/volunteersOrderPage': (context) => VolunteerOrdersScreen(),
       },
     );
   }
