@@ -1,20 +1,20 @@
 {
   "project_info": {
-    "project_number": "890474310680",
-    "project_id": "kindmeals-fba5e",
-    "storage_bucket": "kindmeals-fba5e.firebasestorage.app"
+    "project_number": "656754915837",
+    "project_id": "kindmeals-5c993",
+    "storage_bucket": "kindmeals-5c993.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:890474310680:android:be2236633d61261f76276d",
+        "mobilesdk_app_id": "1:656754915837:android:ddcb83bfaee7682ec30194",
         "android_client_info": {
           "package_name": "com.example.kindmeals"
         }
       },
       "oauth_client": [
         {
-          "client_id": "890474310680-9h9ek0vv3601q4gi9065m8aph4chp7b8.apps.googleusercontent.com",
+          "client_id": "656754915837-vn3kpqohi1qlmkhdok2d6blg42mino13.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.kindmeals",
@@ -22,28 +22,21 @@
           }
         },
         {
-          "client_id": "890474310680-8cig7d11g6cfk0vkoi8hl17tu1u0rf3b.apps.googleusercontent.com",
+          "client_id": "656754915837-ptuuvhmc049utfgatk42bdsv6k04m66j.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBObmkl9FM6dH3y9YKO2xIIme98NXptHLY"
+          "current_key": "AIzaSyAO5ZEm_xRYLVA-9GNO7KVs8Ctrx0C0VvI"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "890474310680-8cig7d11g6cfk0vkoi8hl17tu1u0rf3b.apps.googleusercontent.com",
+              "client_id": "656754915837-ptuuvhmc049utfgatk42bdsv6k04m66j.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "890474310680-58p8j81j8eso2ricjv8e3oqavgugl14s.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.kindmeals"
-              }
             }
           ]
         }
